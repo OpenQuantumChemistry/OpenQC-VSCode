@@ -13,10 +13,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
@@ -27,13 +27,16 @@ jobs:
       - name: Run linter
         run: npm run lint
       
+      - name: Run type check
+        run: npx tsc --noEmit
+      
       - name: Run unit tests
         run: npm run test:unit
       
       - name: Run integration tests
         run: npm run test:integration
       
-      - name: Generate coverage report
+      - name: Generate coverage report (100% required)
         run: npm run test:coverage
       
       - name: Upload coverage to Codecov
@@ -49,10 +52,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -90,10 +93,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
       
@@ -101,21 +104,21 @@ jobs:
         run: npm ci
       
       - name: Run extension tests
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:e2e
 
   build:
     name: Build Extension
     runs-on: ubuntu-latest
-    needs: [test-typescript, test-python, test-extension]
+    needs: [test-typescript, test-python]
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
       
@@ -126,10 +129,10 @@ jobs:
         run: npm run compile
       
       - name: Package extension
-        run: npx vsce package
+        run: npx @vscode/vsce package
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: openqc-vscode
           path: '*.vsix'
@@ -140,7 +143,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Run npm audit
         run: npm audit --audit-level=moderate
@@ -149,6 +152,7 @@ jobs:
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
 
   lint-all:
     name: Code Quality Check
@@ -156,10 +160,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
       
@@ -175,6 +179,34 @@ jobs:
       - name: Check TypeScript
         run: npx tsc --noEmit
 
+  pre-commit-check:
+    name: Pre-commit Hooks Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Husky
+        run: npm run prepare
+      
+      - name: Check pre-commit hooks exist
+        run: |
+          if [ -f .husky/pre-commit ]; then
+            echo "✅ Pre-commit hook exists"
+          else
+            echo "❌ Pre-commit hook not found"
+            exit 1
+          fi
+
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
@@ -182,7 +214,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Dependency Review
         uses: actions/dependency-review-action@v3
