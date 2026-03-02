@@ -48,7 +48,7 @@ export class DataPlotter {
     }
 
     private updateContent(document: vscode.TextDocument, software: QuantumChemistrySoftware): void {
-        if (!this.panel) return;
+        if (!this.panel) {return;}
 
         const content = document.getText();
         const plotData = this.extractPlotData(content, software);

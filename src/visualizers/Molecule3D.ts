@@ -61,7 +61,7 @@ export class Molecule3D {
         // Line 6: Element names
         // Line 7: Atom counts
         
-        if (lines.length < 7) return atoms;
+        if (lines.length < 7) {return atoms;}
         
         const elementNames = lines[5].trim().split(/\s+/);
         const atomCounts = lines[6].trim().split(/\s+/).map(Number);
@@ -225,7 +225,7 @@ export class Molecule3D {
             }
             
             // Skip title and symmetry lines
-            if (inData && line.trim().length === 0) continue;
+            if (inData && line.trim().length === 0) {continue;}
             
             // Parse atom lines in GAMESS format
             if (inData) {

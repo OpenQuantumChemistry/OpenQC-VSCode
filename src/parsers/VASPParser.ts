@@ -1,0 +1,243 @@
+import { BaseParser, ParseResult, ParsedSection, ParsedParameter, ValidationResult, ParseError, ParseWarning } from './base';
+
+export interface VASPParameters {
+    system?: string;
+    start?: string;
+    charge?: number;
+    spin?: number;
+    encut?: number;
+    prec?: string;
+    ibrion?: number;
+    nsw?: number;
+    isif?: number;
+    ismear?: number;
+    sigma?: number;
+}
+
+export interface POSCARData {
+    comment: string;
+    scale: number;
+    lattice: number[][];
+    atomTypes: string[];
+    atomCounts: number[];
+    coordinateType: 'Direct' | 'Cartesian';
+    coordinates: number[][];
+}
+
+export class VASPParser extends BaseParser {
+    private parsedResult: ParseResult | null = null;
+    private filename: string;
+
+    constructor(content: string, filename: string = 'INCAR') {
+        super(content);
+        this.filename = filename.toUpperCase();
+    }
+
+    parseInput(): ParseResult {
+        if (this.parsedResult) {
+            return this.parsedResult;
+        }
+
+        switch (this.filename) {
+            case 'POSCAR':
+                return this.parsePOSCAR();
+            case 'KPOINTS':
+                return this.parseKPOINTS();
+            case 'INCAR':
+            default:
+                return this.parseINCAR();
+        }
+    }
+
+    private parseINCAR(): ParseResult {
+        const sections: ParsedSection[] = [];
+        const parameters: ParsedParameter[] = [];
+        const errors: ParseError[] = [];
+        const warnings: ParseWarning[] = [];
+
+        for (let i = 0; i < this.lines.length; i++) {
+            const line = this.lines[i].trim();
+            
+            if (!line || line.startsWith('#')) {
+                continue;
+            }
+
+            const kv = this.parseKeyValue(line, '=');
+            if (kv) {
+                const param: ParsedParameter = {
+                    name: kv.key.toUpperCase(),
+                    value: this.convertValue(kv.value),
+                    line: i
+                };
+                parameters.push(param);
+            } else if (line && !line.includes('=')) {
+                warnings.push({
+                    message: `Possible malformed line: "${line}"`,
+                    line: i
+                });
+            }
+        }
+
+        sections.push({
+            name: 'INCAR',
+            startLine: 0,
+            endLine: this.lines.length - 1,
+            parameters
+        });
+
+        this.parsedResult = { sections, parameters, errors, warnings };
+        return this.parsedResult;
+    }
+
+    private parsePOSCAR(): ParseResult {
+        const sections: ParsedSection[] = [];
+        const parameters: ParsedParameter[] = [];
+        const errors: ParseError[] = [];
+        const warnings: ParseWarning[] = [];
+
+        if (this.lines.length < 8) {
+            errors.push({
+                message: 'POSCAR file too short',
+                line: 0,
+                severity: 'error'
+            });
+            return { sections, parameters, errors, warnings };
+        }
+
+        let lineIdx = 0;
+        
+        const comment = this.lines[lineIdx++].trim();
+        parameters.push({ name: 'Comment', value: comment, line: 0 });
+
+        const scale = parseFloat(this.lines[lineIdx++].trim());
+        if (isNaN(scale)) {
+            errors.push({ message: 'Invalid scaling factor', line: 1, severity: 'error' });
+        }
+        parameters.push({ name: 'Scale', value: scale, line: 1 });
+
+        const lattice: number[][] = [];
+        for (let i = 0; i < 3; i++) {
+            const parts = this.lines[lineIdx++].trim().split(/\s+/).map(Number);
+            if (parts.length >= 3) {
+                lattice.push(parts.slice(0, 3));
+            }
+        }
+        
+        const atomTypes = this.lines[lineIdx++].trim().split(/\s+/);
+        const atomCounts = this.lines[lineIdx++].trim().split(/\s+/).map(Number);
+        
+        atomTypes.forEach((type, idx) => {
+            parameters.push({ name: `Atom_${type}`, value: atomCounts[idx] || 0, line: lineIdx - 2 + idx });
+        });
+
+        const coordType = this.lines[lineIdx++].trim();
+        
+        sections.push({
+            name: 'POSCAR',
+            startLine: 0,
+            endLine: this.lines.length - 1,
+            parameters
+        });
+
+        this.parsedResult = { sections, parameters, errors, warnings };
+        return this.parsedResult;
+    }
+
+    private parseKPOINTS(): ParseResult {
+        const sections: ParsedSection[] = [];
+        const parameters: ParsedParameter[] = [];
+        const errors: ParseError[] = [];
+        const warnings: ParseWarning[] = [];
+
+        if (this.lines.length < 4) {
+            errors.push({
+                message: 'KPOINTS file too short',
+                line: 0,
+                severity: 'error'
+            });
+            return { sections, parameters, errors, warnings };
+        }
+
+        const comment = this.lines[0].trim();
+        const kptStyle = parseInt(this.lines[1].trim());
+        const kptScheme = this.lines[2].trim();
+        
+        parameters.push({ name: 'Comment', value: comment, line: 0 });
+        parameters.push({ name: 'KpointStyle', value: kptStyle, line: 1 });
+        parameters.push({ name: 'KpointScheme', value: kptScheme, line: 2 });
+
+        const kptLine = this.lines[3].trim().split(/\s+/).map(Number);
+        if (kptLine.length >= 3) {
+            parameters.push({ name: 'Kx', value: kptLine[0], line: 3 });
+            parameters.push({ name: 'Ky', value: kptLine[1], line: 3 });
+            parameters.push({ name: 'Kz', value: kptLine[2], line: 3 });
+        }
+
+        sections.push({
+            name: 'KPOINTS',
+            startLine: 0,
+            endLine: this.lines.length - 1,
+            parameters
+        });
+
+        this.parsedResult = { sections, parameters, errors, warnings };
+        return this.parsedResult;
+    }
+
+    private convertValue(value: string): string | number | boolean {
+        const lower = value.toLowerCase();
+        if (lower === 'true' || lower === '.true.') {return true;}
+        if (lower === 'false' || lower === '.false.') {return false;}
+        
+        const num = Number(value);
+        if (!isNaN(num)) {return num;}
+        
+        return value;
+    }
+
+    validate(): ValidationResult {
+        const result = this.parseInput();
+        const errors = [...result.errors];
+        const warnings = [...result.warnings];
+
+        if (this.filename === 'INCAR') {
+            const required = ['ENCUT', 'PREC'];
+            const present = result.parameters.map(p => p.name.toUpperCase());
+            
+            for (const req of required) {
+                if (!present.includes(req)) {
+                    warnings.push({
+                        message: `Missing recommended parameter: ${req}`,
+                        line: 0
+                    });
+                }
+            }
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors,
+            warnings
+        };
+    }
+
+    getSections(): ParsedSection[] {
+        return this.parseInput().sections;
+    }
+
+    getParameters(): ParsedParameter[] {
+        return this.parseInput().parameters;
+    }
+
+    getParameter(name: string): ParsedParameter | undefined {
+        return this.parseInput().parameters.find(p => 
+            p.name.toUpperCase() === name.toUpperCase()
+        );
+    }
+
+    getSection(name: string): ParsedSection | undefined {
+        return this.parseInput().sections.find(s => 
+            s.name.toUpperCase() === name.toUpperCase()
+        );
+    }
+}

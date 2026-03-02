@@ -106,11 +106,11 @@ export class CP2KParser extends BaseParser {
 
     private convertValue(value: string): string | number | boolean {
         const lower = value.toLowerCase();
-        if (lower === 'true' || lower === 'yes' || lower === 'on') return true;
-        if (lower === 'false' || lower === 'no' || lower === 'off') return false;
+        if (lower === 'true' || lower === 'yes' || lower === 'on') {return true;}
+        if (lower === 'false' || lower === 'no' || lower === 'off') {return false;}
         
         const num = Number(value);
-        if (!isNaN(num)) return num;
+        if (!isNaN(num)) {return num;}
         
         if (value.startsWith('"') && value.endsWith('"')) {
             return value.slice(1, -1);

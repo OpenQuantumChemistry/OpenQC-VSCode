@@ -198,6 +198,12 @@
         "title": "OpenQC: Restart Language Server",
         "icon": "$(debug-restart)"
       }
+      ,
+      {
+        "command": "openqc.validate",
+        "title": "OpenQC: Validate Input File",
+        "icon": "$(check)"
+      }
     ],
     "configuration": {
       "title": "OpenQC",

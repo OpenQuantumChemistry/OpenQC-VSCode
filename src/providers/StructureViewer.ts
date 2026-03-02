@@ -88,7 +88,7 @@ export class StructureViewer {
     }
 
     private updateContent(document: vscode.TextDocument, software: QuantumChemistrySoftware): void {
-        if (!this.panel) return;
+        if (!this.panel) {return;}
 
         const content = document.getText();
         const atoms = this.molecule3D.parseAtoms(content, software);
@@ -97,7 +97,7 @@ export class StructureViewer {
     }
 
     private updatePreviewContent(document: vscode.TextDocument, software: QuantumChemistrySoftware): void {
-        if (!this.panel) return;
+        if (!this.panel) {return;}
 
         const content = document.getText();
         const previewData = this.parseInputPreview(content, software);

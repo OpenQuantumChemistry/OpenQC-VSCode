@@ -4,7 +4,7 @@
 
 export interface ParsedParameter {
     name: string;
-    value: string | number | boolean;
+    value: string | number | boolean | number[];
     line: number;
     description?: string;
 }

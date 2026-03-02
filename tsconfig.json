@@ -16,10 +16,10 @@
   "exclude": [
     "node_modules",
     ".vscode-test",
-    "out"
+    "out",
+    "tests"
   ],
   "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts"
+    "src/**/*.ts"
   ]
 }

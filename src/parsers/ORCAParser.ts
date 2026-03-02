@@ -124,11 +124,11 @@ export class ORCAParser extends BaseParser {
 
     private convertValue(value: string): string | number | boolean {
         const lower = value.toLowerCase();
-        if (lower === 'true') return true;
-        if (lower === 'false') return false;
+        if (lower === 'true') {return true;}
+        if (lower === 'false') {return false;}
         
         const num = Number(value);
-        if (!isNaN(num)) return num;
+        if (!isNaN(num)) {return num;}
         
         return value;
     }
