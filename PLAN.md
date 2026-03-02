@@ -33,12 +33,12 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 - [x] Documentation framework (Vitepress)
 
 #### Week 3-4: Core Parsing Engine
-- [ ] VASP input file parser (INCAR, POSCAR, KPOINTS, POTCAR)
-- [ ] Gaussian input file parser (.gjf, .com)
-- [ ] ORCA input file parser (.inp)
-- [ ] Abstract parser interface for extensibility
-- [ ] Syntax highlighting for all supported formats
-- [ ] Basic validation and error reporting
+- [x] VASP input file parser (INCAR, POSCAR, KPOINTS, POTCAR) - PR: feat/vasp-parser
+- [x] Gaussian input file parser (.gjf, .com) - Already implemented
+- [x] ORCA input file parser (.inp) - Already implemented
+- [x] Abstract parser interface for extensibility - BaseParser abstract class
+- [x] Syntax highlighting for all supported formats - 7 tmLanguage.json files
+- [x] Basic validation and error reporting - ValidationResult interface
 
 ### Technology Stack
 - **Language**: TypeScript (extension), Python (backend utilities)

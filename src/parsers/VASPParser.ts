@@ -66,19 +66,22 @@ export class VASPParser extends BaseParser {
     for (let i = 0; i < this.lines.length; i++) {
       const line = this.lines[i].trim();
 
-      if (!line || line.startsWith('#')) {
-        continue;
-      }
+      // Skip empty lines and comments
+      if (!line || line.startsWith('#')) continue;
 
-      const kv = this.parseKeyValue(line, '=');
+      // Remove inline comments
+      const lineWithoutComment = line.split('#')[0].trim();
+      if (!lineWithoutComment) continue;
+
+      const kv = this.parseKeyValue(lineWithoutComment, '=');
       if (kv) {
-        const param: ParsedParameter = {
+        parameters.push({
           name: kv.key.toUpperCase(),
           value: this.convertValue(kv.value),
           line: i,
-        };
-        parameters.push(param);
-      } else if (line && !line.includes('=')) {
+        });
+      } else if (lineWithoutComment && !lineWithoutComment.includes('=')) {
+        // Line without '=' is malformed
         warnings.push({
           message: `Possible malformed line: "${line}"`,
           line: i,
@@ -121,7 +124,7 @@ export class VASPParser extends BaseParser {
     if (isNaN(scale)) {
       errors.push({ message: 'Invalid scaling factor', line: 1, severity: 'error' });
     }
-    parameters.push({ name: 'Scale', value: scale, line: 1 });
+    parameters.push({ name: 'SCALE', value: scale, line: 1 });
 
     const lattice: number[][] = [];
     for (let i = 0; i < 3; i++) {
@@ -180,9 +183,9 @@ export class VASPParser extends BaseParser {
 
     const kptLine = this.lines[3].trim().split(/\s+/).map(Number);
     if (kptLine.length >= 3) {
-      parameters.push({ name: 'Kx', value: kptLine[0], line: 3 });
-      parameters.push({ name: 'Ky', value: kptLine[1], line: 3 });
-      parameters.push({ name: 'Kz', value: kptLine[2], line: 3 });
+      parameters.push({ name: 'KX', value: kptLine[0], line: 3 });
+      parameters.push({ name: 'KY', value: kptLine[1], line: 3 });
+      parameters.push({ name: 'KZ', value: kptLine[2], line: 3 });
     }
 
     sections.push({
@@ -206,7 +209,7 @@ export class VASPParser extends BaseParser {
     }
 
     const num = Number(value);
-    if (!isNaN(num)) {
+    if (!isNaN(num) && value !== '') {
       return num;
     }
 
