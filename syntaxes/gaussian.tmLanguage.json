@@ -1,44 +1,131 @@
 {
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Gaussian",
   "scopeName": "source.gaussian",
   "patterns": [
     {
-      "match": "^[!]",
-      "name": "comment.line.exclamation.gaussian"
+      "include": "#comments"
     },
     {
-      "match": "^(#[^\\n]*)",
-      "name": "keyword.control.route.gaussian"
+      "include": "#link0"
     },
     {
-      "match": "%(\\w+)\\s*=\\s*(.+)",
-      "captures": {
-        "1": { "name": "variable.parameter.gaussian" },
-        "2": { "name": "string.unquoted.gaussian" }
-      }
+      "include": "#route-section"
     },
     {
-      "match": "\\b(HF|DFT|MP2|MP3|MP4|CCSD|CCSD\\(T\\)|B3LYP|PBE|BP86|M06|TPSS|WB97|CAM-B3LYP)\\b",
-      "name": "support.function.method.gaussian"
+      "include": "#charge-spin"
     },
     {
-      "match": "\\b(Opt|Freq|SP|IRC|TS|Polar|NMR|EPR|Solvation)\\b",
-      "name": "support.function.jobtype.gaussian"
+      "include": "#keywords"
     },
     {
-      "match": "\\b(6-31G\\*\\*|6-311\\+\\+G\\*\\*|cc-pVDZ|cc-pVTZ|aug-cc-pVTZ|def2-SVP|def2-TZVP)\\b",
-      "name": "support.function.basis.gaussian"
+      "include": "#numbers"
     },
     {
-      "match": "\\b\\d+\\.\\d+([eE][+-]?\\d+)?\\b",
-      "name": "constant.numeric.float.gaussian"
-    },
-    {
-      "match": "\\b\\d+\\b",
-      "name": "constant.numeric.integer.gaussian"
-    },
-    {
-      "match": "^\\s*([A-Z][a-z]?)\\s+\\d+\\.\\d+\\s+\\d+\\.\\d+\\s+\\d+\\.\\d+",
-      "name": "entity.name.type.element.gaussian"
+      "include": "#elements"
     }
-  ]
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "match": "!.*$",
+          "name": "comment.line.exclamation.gaussian"
+        }
+      ]
+    },
+    "link0": {
+      "patterns": [
+        {
+          "match": "(%)(nprocshared|nproc|mem|chk|rwf|int|d2e|lindaworkers|subst|kjob|save|useoldsymm|oldcasis|oldmatrix|keys|mix|check|checkpoint|oldcheck|allcheck|oldzmat|genchk|gezhf|rest)\b",
+          "captures": {
+            "1": { "name": "punctuation.definition.link0.gaussian" },
+            "2": { "name": "keyword.control.link0.gaussian" }
+          }
+        },
+        {
+          "match": "(%)(\\w+)",
+          "captures": {
+            "1": { "name": "punctuation.definition.link0.gaussian" },
+            "2": { "name": "keyword.other.link0.gaussian" }
+          }
+        }
+      ]
+    },
+    "route-section": {
+      "patterns": [
+        {
+          "match": "^(#)([pnN]?)(\\s*)(.*)$",
+          "captures": {
+            "1": { "name": "punctuation.definition.route.gaussian" },
+            "2": { "name": "constant.other.route-level.gaussian" },
+            "4": { "patterns": [{ "include": "#keywords" }] }
+          }
+        }
+      ]
+    },
+    "charge-spin": {
+      "patterns": [
+        {
+          "match": "^\\s*(\\d+)\\s+(\\d+)\\s*$",
+          "captures": {
+            "1": { "name": "constant.numeric.charge.gaussian" },
+            "2": { "name": "constant.numeric.spin.gaussian" }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "\\b(opt|freq|sp|force|energy|irc|scan|td|nmr|pop|density|guess|stable|cphf|raman|readis|volume|polar|prop|nbo|sac|sac-ci|eet|zindo|cndo|indo|mndo|am1|pm3|pm6|pm7|hf|dft|mp2|mp3|mp4|mp5|ccsd|ccsd\\(t\\)|qcisd|qcisd\\(t\\)|bd|bd\\(t\\)|casscf|rhf|uhf|rohf|gvb|multiconfiguration)\\b",
+          "name": "keyword.control.method.gaussian",
+          "caseInsensitive": true
+        },
+        {
+          "match": "\\b(b3lyp|pbe0|pbe1pbe|m06|m06-2x|m06-l|m11|m11-l|wb97x-d|wb97x|wb97|cam-b3lyp|lc-wpbe|b2plyp|b2gpplyp|mpw2plyp|scan|r2scan|revscan|pbe|rpbe|revpbe|pw91|blyp|bp86|bpbe|olyp|opbe|tpss|revtpss|m05|m05-2x|hse06|hse2pbe|n12|n12-sx|mn12-l|mn12-sx|mn15|mn15-l|sogga|sogga11|sogga11-x)\\b",
+          "name": "support.constant.functional.gaussian",
+          "caseInsensitive": true
+        },
+        {
+          "match": "\\b(sto-3g|3-21g|6-21g|4-31g|6-31g|6-31g\\*|6-31g\\*\\*|6-31\\+g|6-31\\+g\\*|6-31\\+g\\*\\*|6-311g|6-311g\\*|6-311g\\*\\*|6-311\\+g|6-311\\+g\\*|6-311\\+g\\*\\*|6-311\\+\\+g\\*\\*|def2-svp|def2-svpd|def2-tzvp|def2-tzvpd|def2-tzvpp|def2-tzvppd|def2-qzvp|def2-qzvpd|def2-qzvpp|def2-qzvppd|cc-pvdz|cc-pvtz|cc-pvqz|cc-pv5z|aug-cc-pvdz|aug-cc-pvtz|aug-cc-pvqz|aug-cc-pv5z|jun-cc-pvdz|jun-cc-pvtz|may-cc-pvdz|may-cc-pvtz)\\b",
+          "name": "support.constant.basis.gaussian",
+          "caseInsensitive": true
+        },
+        {
+          "match": "\\b(scf|int|pop|scrf|empiricaldispersion|guess|geom|symm|output|density|counterpoise|massaged|cphf|iop|gen|genecp|pseudo)\\b",
+          "name": "keyword.other.option.gaussian",
+          "caseInsensitive": true
+        },
+        {
+          "match": "=(\\w+(?:\\([^)]*\\))?)",
+          "captures": {
+            "1": { "name": "string.unquoted.value.gaussian" }
+          }
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "\\b[-+]?\\d+\\.\\d+(?:[eE][-+]?\\d+)?\\b",
+          "name": "constant.numeric.float.gaussian"
+        },
+        {
+          "match": "\\b[-+]?\\d+\\b",
+          "name": "constant.numeric.integer.gaussian"
+        }
+      ]
+    },
+    "elements": {
+      "patterns": [
+        {
+          "match": "^\\s*([A-Z][a-z]?)\\s+[-+]?\\d+\\.\\d+",
+          "captures": {
+            "1": { "name": "support.constant.element.gaussian" }
+          }
+        }
+      ]
+    }
+  }
 }

@@ -1,0 +1,25 @@
+start Si2
+
+title "Si2 molecule calculation"
+
+charge 0
+multiplicity 3
+
+geometry units angstroms
+  Si  0.000000   0.000000   0.000000
+  Si  0.000000   0.000000   2.350000
+end
+
+basis
+  Si library cc-pVTZ
+end
+
+scf
+  uhf
+  maxiter 100
+  thresh 1e-6
+  singlet
+  triplet
+end
+
+task scf energy

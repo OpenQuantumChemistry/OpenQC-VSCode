@@ -1,32 +1,90 @@
 {
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "VASP",
   "scopeName": "source.vasp",
   "patterns": [
     {
-      "match": "^\\s*#.*$",
-      "name": "comment.line.number-sign.vasp"
+      "include": "#comments"
     },
     {
-      "match": "\\b([A-Z][A-Z]*)\\s*=\\s*(.+)",
-      "captures": {
-        "1": { "name": "keyword.control.vasp" },
-        "2": { "name": "string.unquoted.vasp" }
-      }
+      "include": "#parameters"
     },
     {
-      "match": "\\.TRUE\\.|\\.FALSE\\.",
-      "name": "constant.language.boolean.vasp"
+      "include": "#booleans"
     },
     {
-      "match": "\\b\\d+\\.\\d+([eE][+-]?\\d+)?\\b",
-      "name": "constant.numeric.float.vasp"
+      "include": "#numbers"
     },
     {
-      "match": "\\b\\d+\\b",
-      "name": "constant.numeric.integer.vasp"
+      "include": "#elements"
     },
     {
-      "match": "^\\s*[A-Z][a-z]?\\s+-?\\d+\\.\\d+\\s+-?\\d+\\.\\d+\\s+-?\\d+\\.\\d+",
-      "name": "entity.name.type.element.vasp"
+      "include": "#coordinate-types"
     }
-  ]
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "match": "[#;!].*$",
+          "name": "comment.line.vasp"
+        }
+      ]
+    },
+    "parameters": {
+      "patterns": [
+        {
+          "match": "^\\s*(SYSTEM|ENCUT|ENAUG|PREC|ISPIN|MAGMOM|MASS|POMASS|INIWAV|ICHARG|ISTART|ISPIN|LNONCOLLINEAR|LSORBIT|SAXIS|NBANDS|NUPDOWN|NIONS|NELECT|NELM|NELMIN|NELMDL|EDIFF|EDIFFG|ALGO|IALGO|LDIAG|IMIX|AMIX|BMIX|AMIN|WC|INIMIX|MIXPRE|MAXMIX|AMIX_MAG|BMIX_MAG|KNITER|NELECT|TIME|LWAVE|LCHARG|LVHAR|LVTOT|LELF|LPARD|LORBIT|LSEPB|LSEPK|LWANNIER90_WRITE|LWANNIER90_RUN|KPAR|NCORE|NSIM|NBLK|LPLANE|LSCALAPACK|LSCAAWARE|LSCALU|NELM|WEIMIN|EBREAK|DEPER|ISMEAR|SIGMA|FERWE|FERDO|SMEARINGS|KSPACING|KGAMMA|LREAL|ROPT|PSTRESS|TEBEG|TEEND|SMASS|NPACO|APACO|RWIGS|LORBIT|EMIN|EMAX|NBANDS|ISIF|POTIM|PSTRESS|ENCUTFOCK|HFSCREEN|AEXX|AGGAX|AGGAC|ALDAC|LVTOT|LELF|LORBIT|IDIPOL|DIPOL|EFIELD|LCALCPOL|LCALCEPS|IBRION|POTIM|PSTRESS|ISIF|IWAVPR|I_CONSTRAINED_M|LCORR|POTIM|PSTRESS|SMASS|NBLOCK|KBLOCK|PACO|APACO|LDIPOL|IDIPOL|EPSILON|GGA|VOSKOWN|LHFCALC|AEXX|AGGAX|AGGAC|ALDAC|LMAXFOCK|LMAXFOCKAE|NLSPLINE|NKRED|NKREDX|NKREDY|NKREDZ|SHIFTRED|HFSCREEN|ODDONLY|EVENONLY|LADDER|LRPA|L2ORDER|LPEAD|LCALCEPS|LCALCPOL|LEFG|QUAD_EFG|LBERRY|IGPAR|NPPSTR|LEPSILON|LRPA|LNABLA|LJ_ONLY|LVDW_EWALD|LVDW_ONECELL|LSCALER0|SCALEE|LESITCHI|LMAGBLOCH|LCHIMAG|DQ|LRPA|LNABLA|LJ_ONLY|LVDW_EWALD|LVDW_ONECELL|LSCALER0|SCALEE|LESITCHI|LMAGBLOCH|LCHIMAG|DQ|LRPA|LNABLA|LJ_ONLY|LVDW_EWALD|LVDW_ONECELL|LSCALER0|SCALEE|LESITCHI|LMAGBLOCH|LCHIMAG|DQ|LRPA|LNABLA|LJ_ONLY|LVDW_EWALD|LVDW_ONECELL|LSCALER0|SCALEE|LESITCHI|LMAGBLOCH|LCHIMAG|DQ|NSW|NBLOCK|KBLOCK|POTIM|SMASS|TEBEG|TEEND|POMASS|PMASS|MDALGO|ANDERSEN_PROB|M_SQR|M_REC|M_PROJ|INVC_FLAT|LCORE_RELAX|M_CONS|M_CONSV|PMASS|MDALGO|ANDERSEN_PROB|M_SQR|M_REC|M_PROJ|INVC_FLAT|LCORE_RELAX|M_CONS|M_CONSV|PMASS|MDALGO|ANDERSEN_PROB|M_SQR|M_REC|M_PROJ|INVC_FLAT|LCORE_RELAX|M_CONS|M_CONSV|SPRING|VCA|I_CONSTRAINED_M|M_CONS|LAMBDA|NWRITE|LWAVE|LCHARG|LVTOT|LVHAR|LELF|LPARD|LORBIT|LSEPB|LSEPK|LWANNIER90_WRITE|LWANNIER90_RUN)\\s*=\\s*(.+?)?\\s*$",
+          "captures": {
+            "1": { "name": "keyword.control.vasp" },
+            "2": { "name": "string.unquoted.vasp" }
+          }
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "match": "(?i)\\.?(TRUE|FALSE|T|F|ON|OFF|YES|NO|AUTO)\\.?",
+          "name": "constant.language.boolean.vasp"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "\\b[-+]?\\d+\\.\\d+(?:[eEdD][-+]?\\d+)?\\b",
+          "name": "constant.numeric.float.vasp"
+        },
+        {
+          "match": "\\b[-+]?\\d+\\b",
+          "name": "constant.numeric.integer.vasp"
+        }
+      ]
+    },
+    "elements": {
+      "patterns": [
+        {
+          "match": "^\\s*([A-Z][a-z]?)\\s+(?:[-+]?\\d+\\.\\d+\\s+){3}",
+          "captures": {
+            "1": { "name": "support.constant.element.vasp" }
+          }
+        },
+        {
+          "match": "^\\s*([A-Z][a-z]?)\\s*$",
+          "captures": {
+            "1": { "name": "support.constant.element.vasp" }
+          }
+        }
+      ]
+    },
+    "coordinate-types": {
+      "patterns": [
+        {
+          "match": "(?i)\\b(Direct|Cartesian|Reciprocal)\\b",
+          "name": "keyword.control.coordinate.vasp"
+        }
+      ]
+    }
+  }
 }
