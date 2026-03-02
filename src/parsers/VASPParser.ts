@@ -51,6 +51,8 @@ export class VASPParser extends BaseParser {
         return this.parsePOSCAR();
       case 'KPOINTS':
         return this.parseKPOINTS();
+      case 'POTCAR':
+        return this.parsePOTCAR();
       case 'INCAR':
       default:
         return this.parseINCAR();
@@ -199,6 +201,54 @@ export class VASPParser extends BaseParser {
     return this.parsedResult;
   }
 
+  private parsePOTCAR(): ParseResult {
+    const sections: ParsedSection[] = [];
+    const parameters: ParsedParameter[] = [];
+    const errors: ParseError[] = [];
+    const warnings: ParseWarning[] = [];
+
+    if (this.lines.length < 1 || !this.lines[0].trim()) {
+      errors.push({
+        message: 'POTCAR file is empty',
+        line: 0,
+        severity: 'error',
+      });
+      return { sections, parameters, errors, warnings };
+    }
+
+    // Parse header line: "PAW_PBE H 01Jan2001"
+    const headerLine = this.lines[0].trim();
+    const headerParts = headerLine.split(/\s+/);
+    if (headerParts.length >= 3) {
+      parameters.push({ name: 'POTCARType', value: headerParts[0], line: 0 });
+      parameters.push({ name: 'Element', value: headerParts[1], line: 0 });
+      parameters.push({ name: 'Date', value: headerParts[2], line: 0 });
+    }
+
+    // Parse ENMAX and other parameters
+    for (let i = 1; i < this.lines.length; i++) {
+      const line = this.lines[i];
+      const enmaxMatch = line.match(/ENMAX\s*=\s*([\d.]+)/);
+      if (enmaxMatch) {
+        parameters.push({ name: 'ENMAX', value: parseFloat(enmaxMatch[1]), line: i });
+      }
+      const enminMatch = line.match(/ENMIN\s*=\s*([\d.]+)/);
+      if (enminMatch) {
+        parameters.push({ name: 'ENMIN', value: parseFloat(enminMatch[1]), line: i });
+      }
+    }
+
+    sections.push({
+      name: 'POTCAR',
+      startLine: 0,
+      endLine: this.lines.length - 1,
+      parameters,
+    });
+
+    this.parsedResult = { sections, parameters, errors, warnings };
+    return this.parsedResult;
+  }
+
   private convertValue(value: string): string | number | boolean {
     const lower = value.toLowerCase();
     if (lower === 'true' || lower === '.true.') {
@@ -256,5 +306,132 @@ export class VASPParser extends BaseParser {
 
   getSection(name: string): ParsedSection | undefined {
     return this.parseInput().sections.find(s => s.name.toUpperCase() === name.toUpperCase());
+  }
+
+  /**
+   * Extract atomic coordinates from POSCAR file
+   * Returns array of [x, y, z] coordinates
+   */
+  getCoordinates(): number[][] {
+    if (this.filename !== 'POSCAR') {
+      return [];
+    }
+
+    const lines = this.lines.filter(line => line.trim() !== '');
+    if (lines.length < 8) {
+      return [];
+    }
+
+    let lineIdx = 0;
+    lineIdx++; // Skip comment
+    lineIdx++; // Skip scale
+
+    // Skip lattice vectors (3 lines)
+    lineIdx += 3;
+
+    // Skip atom types line
+    lineIdx++;
+
+    // Get atom counts
+    const atomCounts = lines[lineIdx].trim().split(/\s+/).map(Number);
+    const totalAtoms = atomCounts.reduce((sum, count) => sum + count, 0);
+    lineIdx++;
+
+    // Check for selective dynamics
+    if (lines[lineIdx].trim().toLowerCase().startsWith('selective')) {
+      lineIdx++;
+    }
+
+    // Skip coordinate type line (Direct/Cartesian)
+    lineIdx++;
+
+    // Extract coordinates
+    const coordinates: number[][] = [];
+    for (let i = 0; i < totalAtoms && lineIdx < lines.length; i++) {
+      const parts = lines[lineIdx].trim().split(/\s+/);
+      if (parts.length >= 3) {
+        const x = parseFloat(parts[0]);
+        const y = parseFloat(parts[1]);
+        const z = parseFloat(parts[2]);
+        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+          coordinates.push([x, y, z]);
+        }
+      }
+      lineIdx++;
+    }
+
+    return coordinates;
+  }
+
+  /**
+   * Extract lattice vectors from POSCAR file
+   * Returns array of 3 vectors, each with [x, y, z]
+   */
+  getLatticeVectors(): number[][] {
+    if (this.filename !== 'POSCAR') {
+      return [];
+    }
+
+    const lines = this.lines.filter(line => line.trim() !== '');
+    if (lines.length < 5) {
+      return [];
+    }
+
+    const lattice: number[][] = [];
+    for (let i = 2; i < 5 && i < lines.length; i++) {
+      const parts = lines[i].trim().split(/\s+/).map(Number);
+      if (parts.length >= 3) {
+        lattice.push(parts.slice(0, 3));
+      }
+    }
+
+    return lattice;
+  }
+
+  /**
+   * Extract atom types from POSCAR file
+   */
+  getAtomTypes(): string[] {
+    if (this.filename !== 'POSCAR') {
+      return [];
+    }
+
+    const lines = this.lines.filter(line => line.trim() !== '');
+    if (lines.length < 6) {
+      return [];
+    }
+
+    // Atom types are on line 5 (0-indexed: after comment, scale, 3 lattice lines)
+    const atomTypesLine = lines[5].trim();
+    if (!atomTypesLine) {
+      return [];
+    }
+
+    return atomTypesLine.split(/\s+/);
+  }
+
+  /**
+   * Extract atom counts from POSCAR file
+   */
+  getAtomCounts(): number[] {
+    if (this.filename !== 'POSCAR') {
+      return [];
+    }
+
+    const lines = this.lines.filter(line => line.trim() !== '');
+    if (lines.length < 7) {
+      return [];
+    }
+
+    // Atom counts are on line 6
+    const atomCountsLine = lines[6].trim();
+    if (!atomCountsLine) {
+      return [];
+    }
+
+    return atomCountsLine
+      .split(/\s+/)
+      .map(Number)
+      .filter(n => !isNaN(n));
   }
 }

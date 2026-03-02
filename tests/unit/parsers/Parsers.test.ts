@@ -470,6 +470,53 @@ describe('GAMESSParser', () => {
   });
 });
 
+describe('VASPParser POTCAR support', () => {
+  describe('parseInput', () => {
+    it('should parse POTCAR file and extract element info', () => {
+      const content = `PAW_PBE H 01Jan2001
+        1.00000000000000
+          parameters from PSCTR are:
+          VRHFIN =H: ultrasoft
+          LEXCH  = PE
+          EATOM  =    12.4888 eV,     .9171 Ry
+
+         TITEL  = PAW_PBE H 01Jan2001`;
+      const parser = new VASPParser(content, 'POTCAR');
+      const result = parser.parseInput();
+      expect(result.parameters).toBeDefined();
+      expect(result.parameters.find(p => p.name === 'Element')?.value).toBe('H');
+      expect(result.parameters.find(p => p.name === 'POTCARType')?.value).toBe('PAW_PBE');
+    });
+
+    it('should parse POTCAR with ENMAX', () => {
+      const content = `PAW_PBE O 01Jan2001
+        1.00000000000000
+       ENMAX  =  400.000; ENMIN  =  300.000 eV
+       TITEL  = PAW_PBE O 01Jan2001`;
+      const parser = new VASPParser(content, 'POTCAR');
+      const result = parser.parseInput();
+      const enmax = result.parameters.find(p => p.name === 'ENMAX');
+      expect(enmax).toBeDefined();
+      expect(enmax?.value).toBe(400.0);
+    });
+
+    it('should validate POTCAR file', () => {
+      const content = `PAW_PBE H 01Jan2001
+        1.00000000000000`;
+      const parser = new VASPParser(content, 'POTCAR');
+      const validation = parser.validate();
+      expect(validation).toHaveProperty('valid');
+    });
+
+    it('should return empty parameters for empty POTCAR', () => {
+      const parser = new VASPParser('', 'POTCAR');
+      const result = parser.parseInput();
+      expect(result.parameters).toEqual([]);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+  });
+});
+
 describe('NWChemParser', () => {
   describe('parseInput', () => {
     it('should parse simple NWChem input', () => {
