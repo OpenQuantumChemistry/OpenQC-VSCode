@@ -179,11 +179,47 @@ invalid line
     });
 
     it('should handle NWChem with invalid atoms', () => {
-      const content = `geometry units angstrom 
+      const content = `geometry units angstrom
 invalid line
 end`;
       const atoms = visualizer.parseAtoms(content, 'NWChem' as QuantumChemistrySoftware);
       expect(atoms).toEqual([]);
+    });
+
+    it('should handle VASP with insufficient lines', () => {
+      const content = `H2O
+1.0
+10.0 0.0 0.0`;
+      const atoms = visualizer.parseAtoms(content, 'VASP' as QuantumChemistrySoftware);
+      expect(atoms).toEqual([]);
+    });
+
+    it('should handle GAMESS with empty lines in $DATA', () => {
+      const content = ` $DATA
+Test
+C1
+
+H 1 1 0.0 0.0 0.0
+ $END`;
+      const atoms = visualizer.parseAtoms(content, 'GAMESS' as QuantumChemistrySoftware);
+      expect(atoms.length).toBeGreaterThan(0);
+      expect(atoms[0].elem).toBe('H');
+    });
+
+    it('should handle VASP without coordinate type line', () => {
+      // When line 7 doesn't start with 's', 'cartesian', or 'direct',
+      // it means there's no coordinate type line, coordinates start at line 7
+      const content = `H2O
+1.0
+10.0 0.0 0.0
+0.0 10.0 0.0
+0.0 0.0 10.0
+H
+1
+0.0 0.0 0.0`;
+      const atoms = visualizer.parseAtoms(content, 'VASP' as QuantumChemistrySoftware);
+      expect(atoms.length).toBe(1);
+      expect(atoms[0].elem).toBe('H');
     });
   });
 });

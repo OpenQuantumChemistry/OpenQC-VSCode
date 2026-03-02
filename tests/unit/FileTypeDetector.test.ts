@@ -240,5 +240,10 @@ PROJECT_NAME test
       const doc = createMockDocument('/very/deep/nested/path/INCAR', 'ENCUT = 500');
       expect(detector.detectSoftware(doc)).toBe('VASP');
     });
+
+    it('should handle empty filename', () => {
+      const doc = createMockDocument('', 'random content with no patterns');
+      expect(detector.detectSoftware(doc)).toBeNull();
+    });
   });
 });

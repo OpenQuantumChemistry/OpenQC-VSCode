@@ -76,14 +76,10 @@ export class FileTypeDetector {
 
     // Check extension matches
     for (const pattern of this.patterns) {
-      if (pattern.extensions?.includes(extension)) {
+      if (pattern.extensions?.includes(extension) && pattern.contentPatterns) {
         // For ambiguous extensions, check content
-        if (pattern.contentPatterns) {
-          const confidence = this.calculateConfidence(content, pattern.contentPatterns);
-          if (confidence > 0.5) {
-            return pattern.software;
-          }
-        } else {
+        const confidence = this.calculateConfidence(content, pattern.contentPatterns);
+        if (confidence > 0.5) {
           return pattern.software;
         }
       }
