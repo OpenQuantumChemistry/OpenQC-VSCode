@@ -1,0 +1,37 @@
+.PHONY: install-python test-converter test-converter-unit test-converter-integration
+
+# Install Python dependencies for format converter
+install-python:
+	@echo "Installing Python dependencies..."
+	pip3 install -r python/requirements.txt
+	@echo "Python dependencies installed successfully"
+
+# Test format converter (unit tests)
+test-converter-unit:
+	@echo "Running Format Converter unit tests..."
+	npm run test -- --testPathPattern=tests/unit/converters
+
+# Test format converter (integration tests)
+test-converter-integration:
+	@echo "Running Format Converter integration tests..."
+	npm run test -- --testPathPattern=tests/integration/formatConversion
+
+# Test all format converter tests
+test-converter: test-converter-unit test-converter-integration
+
+# Quick test: VASP to XYZ conversion
+test-vasp-to-xyz:
+	@echo "Testing VASP to XYZ conversion..."
+	python3 python/format_converter.py tests/fixtures/format_conversion/POSCAR /tmp/test_output.xyz
+	@cat /tmp/test_output.xyz
+
+# Quick test: XYZ to VASP conversion
+test-xyz-to-vasp:
+	@echo "Testing XYZ to VASP conversion..."
+	python3 python/format_converter.py tests/fixtures/format_conversion/sample.xyz /tmp/test_output.POSCAR
+	@cat /tmp/test_output.POSCAR
+
+# List supported formats
+list-formats:
+	@echo "Supported formats:"
+	python3 python/format_converter.py --list-formats
