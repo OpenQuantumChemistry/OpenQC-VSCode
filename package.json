@@ -248,6 +248,34 @@
         "command": "openqc.sidebar.restartJob",
         "title": "Restart Job",
         "icon": "$(debug-restart)"
+      },
+      {
+        "command": "openqc.convertFormat",
+        "title": "OpenQC: Convert File Format"
+      },
+      {
+        "command": "openqc.convertToXYZ",
+        "title": "OpenQC: Convert to XYZ"
+      },
+      {
+        "command": "openqc.convertToPDB",
+        "title": "OpenQC: Convert to PDB"
+      },
+      {
+        "command": "openqc.convertToVASP",
+        "title": "OpenQC: Convert to VASP"
+      },
+      {
+        "command": "openqc.convertToGaussian",
+        "title": "OpenQC: Convert to Gaussian"
+      },
+      {
+        "command": "openqc.batchConvert",
+        "title": "OpenQC: Batch Convert Files"
+      },
+      {
+        "command": "openqc.checkConverterBackend",
+        "title": "OpenQC: Check Format Converter Backend"
       }
     ],
     "views": {
@@ -385,6 +413,16 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically open visualization on file open"
+        },
+        "openqc.converter.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Path to Python executable for format conversion"
+        },
+        "openqc.converter.preserveMetadata": {
+          "type": "boolean",
+          "default": true,
+          "description": "Preserve metadata during format conversion"
         }
       }
     },
@@ -399,6 +437,17 @@
           "command": "openqc.plotData",
           "group": "navigation",
           "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        },
+        {
+          "submenu": "openqc.convertSubMenu",
+          "group": "navigation",
+          "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        }
+      ],
+      "submenus": [
+        {
+          "id": "openqc.convertSubMenu",
+          "label": "Convert Format"
         }
       ],
       "commandPalette": [
@@ -408,6 +457,26 @@
         },
         {
           "command": "openqc.plotData",
+          "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        },
+        {
+          "command": "openqc.convertFormat",
+          "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        },
+        {
+          "command": "openqc.convertToXYZ",
+          "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        },
+        {
+          "command": "openqc.convertToPDB",
+          "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        },
+        {
+          "command": "openqc.convertToVASP",
+          "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
+        },
+        {
+          "command": "openqc.convertToGaussian",
           "when": "editorLangId =~ /^(cp2k|vasp|gaussian|orca|qe|gamess|nwchem)$/"
         }
       ],
