@@ -316,9 +316,15 @@ describe('LSPManager', () => {
         { fileName: '/test/INCAR', content: 'ENCUT=520' },
         { fileName: '/test/gaussian.com', content: '%chk=test\n# B3LYP\n\n0 1' },
         { fileName: '/test/orca.inp', content: '! HF\n%pal nprocs 4 end\n%maxcore 2000' },
-        { fileName: '/test/qe.in', content: '&CONTROL\n&SYSTEM\ncalculation = "scf"\npseudo_dir = "./"' },
+        {
+          fileName: '/test/qe.in',
+          content: '&CONTROL\n&SYSTEM\ncalculation = "scf"\npseudo_dir = "./"',
+        },
         { fileName: '/test/gamess.inp', content: '$BASIS\n$CONTRL\n$SYSTEM\nruntyp=energy' },
-        { fileName: '/test/nwchem.nw', content: 'geometry\n  H 0 0 0\nend\n\nbasis\n  * library 6-31G*\nend' },
+        {
+          fileName: '/test/nwchem.nw',
+          content: 'geometry\n  H 0 0 0\nend\n\nbasis\n  * library 6-31G*\nend',
+        },
       ];
       for (const tc of testCases) {
         const doc: any = {

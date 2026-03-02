@@ -69,11 +69,15 @@ export class VASPParser extends BaseParser {
       const line = this.lines[i].trim();
 
       // Skip empty lines and comments
-      if (!line || line.startsWith('#')) continue;
+      if (!line || line.startsWith('#')) {
+        continue;
+      }
 
       // Remove inline comments
       const lineWithoutComment = line.split('#')[0].trim();
-      if (!lineWithoutComment) continue;
+      if (!lineWithoutComment) {
+        continue;
+      }
 
       const kv = this.parseKeyValue(lineWithoutComment, '=');
       if (kv) {
