@@ -14,14 +14,17 @@ describe('FileTypeDetector', () => {
 
   describe('detectSoftware', () => {
     it('should detect CP2K files by extension and content', () => {
-      const doc = createMockDocument('/test/input.inp', `
+      const doc = createMockDocument(
+        '/test/input.inp',
+        `
 &GLOBAL
   PROJECT_NAME test
 &END GLOBAL
 &FORCE_EVAL
   METHOD Quickstep
 &END FORCE_EVAL
-      `);
+      `
+      );
       expect(detector.detectSoftware(doc)).toBe('CP2K');
     });
 
@@ -37,7 +40,9 @@ describe('FileTypeDetector', () => {
     });
 
     it('should detect Gaussian files by extension and content', () => {
-      const gjfDoc = createMockDocument('/test/molecule.gjf', `
+      const gjfDoc = createMockDocument(
+        '/test/molecule.gjf',
+        `
 %chk=molecule.chk
 # B3LYP/6-31G(d) opt
 
@@ -45,10 +50,13 @@ Title
 
 0 1
 C 0.0 0.0 0.0
-      `);
+      `
+      );
       expect(detector.detectSoftware(gjfDoc)).toBe('Gaussian');
 
-      const comDoc = createMockDocument('/test/molecule.com', `
+      const comDoc = createMockDocument(
+        '/test/molecule.com',
+        `
 %chk=molecule.chk
 # B3LYP/6-31G(d) opt
 
@@ -56,12 +64,15 @@ Title
 
 0 1
 C 0.0 0.0 0.0
-      `);
+      `
+      );
       expect(detector.detectSoftware(comDoc)).toBe('Gaussian');
     });
 
     it('should detect ORCA files by content', () => {
-      const doc = createMockDocument('/test/input.inp', `
+      const doc = createMockDocument(
+        '/test/input.inp',
+        `
 ! B3LYP def2-TZVP opt
 %pal nprocs 4 end
 %maxcore 2000
@@ -69,12 +80,15 @@ C 0.0 0.0 0.0
 * xyz 0 1
 C 0.0 0.0 0.0
 *
-      `);
+      `
+      );
       expect(detector.detectSoftware(doc)).toBe('ORCA');
     });
 
     it('should detect Quantum ESPRESSO files', () => {
-      const doc = createMockDocument('/test/pw.in', `
+      const doc = createMockDocument(
+        '/test/pw.in',
+        `
 &CONTROL
   calculation = 'scf'
   pseudo_dir = './'
@@ -82,21 +96,27 @@ C 0.0 0.0 0.0
 &SYSTEM
   ibrav = 1
 /
-      `);
+      `
+      );
       expect(detector.detectSoftware(doc)).toBe('Quantum ESPRESSO');
     });
 
     it('should detect GAMESS files', () => {
-      const doc = createMockDocument('/test/input.inp', `
+      const doc = createMockDocument(
+        '/test/input.inp',
+        `
  $BASIS GBASIS=STO NGAUSS=3 $END
  $CONTRL SCFTYP=RHF RUNTYP=ENERGY $END
  $SYSTEM TIMLIM=5 $END
-      `);
+      `
+      );
       expect(detector.detectSoftware(doc)).toBe('GAMESS');
     });
 
     it('should detect NWChem files', () => {
-      const doc = createMockDocument('/test/molecule.nw', `
+      const doc = createMockDocument(
+        '/test/molecule.nw',
+        `
 geometry units angstrom
   C 0.0 0.0 0.0
 end
@@ -108,7 +128,8 @@ end
 scf
   maxiter 100
 end
-      `);
+      `
+      );
       expect(detector.detectSoftware(doc)).toBe('NWChem');
     });
 
@@ -136,11 +157,14 @@ end
 
     it('should use fallback detection when filename pattern not matched', () => {
       // File that doesn't match by filename but matches by content
-      const doc = createMockDocument('/test/random.xyz', `
+      const doc = createMockDocument(
+        '/test/random.xyz',
+        `
 &GLOBAL
 PROJECT_NAME test
 &END GLOBAL
-      `);
+      `
+      );
       const result = detector.detectSoftware(doc);
       // Should detect by content
       expect(result).toBe('CP2K');
@@ -150,8 +174,13 @@ PROJECT_NAME test
   describe('getSoftwareInfo', () => {
     it('should return info for all supported software', () => {
       const softwares: QuantumChemistrySoftware[] = [
-        'CP2K', 'VASP', 'Gaussian', 'ORCA',
-        'Quantum ESPRESSO', 'GAMESS', 'NWChem'
+        'CP2K',
+        'VASP',
+        'Gaussian',
+        'ORCA',
+        'Quantum ESPRESSO',
+        'GAMESS',
+        'NWChem',
       ];
 
       for (const software of softwares) {
@@ -168,8 +197,12 @@ PROJECT_NAME test
       expect(detector.getSoftwareInfo('VASP').website).toBe('https://www.vasp.at');
       expect(detector.getSoftwareInfo('Gaussian').website).toBe('https://gaussian.com');
       expect(detector.getSoftwareInfo('ORCA').website).toBe('https://orcaforum.kofo.mpg.de');
-      expect(detector.getSoftwareInfo('Quantum ESPRESSO').website).toBe('https://www.quantum-espresso.org');
-      expect(detector.getSoftwareInfo('GAMESS').website).toBe('https://www.msg.chem.iastate.edu/gamess');
+      expect(detector.getSoftwareInfo('Quantum ESPRESSO').website).toBe(
+        'https://www.quantum-espresso.org'
+      );
+      expect(detector.getSoftwareInfo('GAMESS').website).toBe(
+        'https://www.msg.chem.iastate.edu/gamess'
+      );
       expect(detector.getSoftwareInfo('NWChem').website).toBe('https://nwchemgit.github.io');
     });
   });

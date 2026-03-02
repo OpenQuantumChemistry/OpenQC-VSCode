@@ -14,17 +14,17 @@ import { HoverProvider } from './HoverProvider';
 import { DefinitionProvider } from './DefinitionProvider';
 
 export interface LSPProviders {
-    completion: CompletionProvider;
-    diagnostics: DiagnosticsProvider;
-    hover: HoverProvider;
-    definition: DefinitionProvider;
+  completion: CompletionProvider;
+  diagnostics: DiagnosticsProvider;
+  hover: HoverProvider;
+  definition: DefinitionProvider;
 }
 
 export function createLSPProviders(): LSPProviders {
-    return {
-        completion: new CompletionProvider(),
-        diagnostics: new DiagnosticsProvider(),
-        hover: new HoverProvider(),
-        definition: new DefinitionProvider(),
-    };
+  return {
+    completion: new CompletionProvider(),
+    diagnostics: new DiagnosticsProvider(),
+    hover: new HoverProvider(),
+    definition: new DefinitionProvider(),
+  };
 }

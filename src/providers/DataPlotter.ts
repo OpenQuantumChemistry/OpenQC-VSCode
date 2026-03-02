@@ -2,252 +2,254 @@ import * as vscode from 'vscode';
 import { FileTypeDetector, QuantumChemistrySoftware } from '../managers/FileTypeDetector';
 
 export class DataPlotter {
-    private panel: vscode.WebviewPanel | undefined;
-    private extensionUri: vscode.Uri;
-    private fileTypeDetector: FileTypeDetector;
+  private panel: vscode.WebviewPanel | undefined;
+  private extensionUri: vscode.Uri;
+  private fileTypeDetector: FileTypeDetector;
 
-    constructor(extensionUri: vscode.Uri) {
-        this.extensionUri = extensionUri;
-        this.fileTypeDetector = new FileTypeDetector();
+  constructor(extensionUri: vscode.Uri) {
+    this.extensionUri = extensionUri;
+    this.fileTypeDetector = new FileTypeDetector();
+  }
+
+  show(editor: vscode.TextEditor | undefined): void {
+    if (!editor) {
+      vscode.window.showWarningMessage('No active editor found');
+      return;
     }
 
-    show(editor: vscode.TextEditor | undefined): void {
-        if (!editor) {
-            vscode.window.showWarningMessage('No active editor found');
-            return;
-        }
-
-        const software = this.fileTypeDetector.detectSoftware(editor.document);
-        if (!software) {
-            vscode.window.showWarningMessage('Unsupported file type for data plotting');
-            return;
-        }
-
-        const column = vscode.ViewColumn.Two;
-        
-        if (this.panel) {
-            this.panel.reveal(column);
-        } else {
-            this.panel = vscode.window.createWebviewPanel(
-                'openqcDataPlotter',
-                'OpenQC: Data Plotter',
-                column,
-                {
-                    enableScripts: true,
-                    localResourceRoots: [this.extensionUri],
-                    retainContextWhenHidden: true
-                }
-            );
-
-            this.panel.onDidDispose(() => {
-                this.panel = undefined;
-            });
-        }
-
-        this.updateContent(editor.document, software);
+    const software = this.fileTypeDetector.detectSoftware(editor.document);
+    if (!software) {
+      vscode.window.showWarningMessage('Unsupported file type for data plotting');
+      return;
     }
 
-    private updateContent(document: vscode.TextDocument, software: QuantumChemistrySoftware): void {
-        if (!this.panel) {return;}
+    const column = vscode.ViewColumn.Two;
 
-        const content = document.getText();
-        const plotData = this.extractPlotData(content, software);
-        
-        this.panel.webview.html = this.getPlotterHtml(plotData, software);
+    if (this.panel) {
+      this.panel.reveal(column);
+    } else {
+      this.panel = vscode.window.createWebviewPanel(
+        'openqcDataPlotter',
+        'OpenQC: Data Plotter',
+        column,
+        {
+          enableScripts: true,
+          localResourceRoots: [this.extensionUri],
+          retainContextWhenHidden: true,
+        }
+      );
+
+      this.panel.onDidDispose(() => {
+        this.panel = undefined;
+      });
     }
 
-    private extractPlotData(content: string, software: QuantumChemistrySoftware): any {
-        const data: any = {
-            software,
-            plots: [],
-            metadata: {}
-        };
+    this.updateContent(editor.document, software);
+  }
 
-        // Extract data based on software type
-        switch (software) {
-            case 'CP2K':
-                data.plots = this.extractCp2kData(content);
-                break;
-            case 'VASP':
-                data.plots = this.extractVaspData(content);
-                break;
-            case 'Gaussian':
-                data.plots = this.extractGaussianData(content);
-                break;
-            case 'ORCA':
-                data.plots = this.extractOrcaData(content);
-                break;
-            case 'Quantum ESPRESSO':
-                data.plots = this.extractQeData(content);
-                break;
-            case 'GAMESS':
-                data.plots = this.extractGamessData(content);
-                break;
-            case 'NWChem':
-                data.plots = this.extractNwchemData(content);
-                break;
-        }
-
-        return data;
+  private updateContent(document: vscode.TextDocument, software: QuantumChemistrySoftware): void {
+    if (!this.panel) {
+      return;
     }
 
-    private extractCp2kData(content: string): any[] {
-        // Extract energy convergence data
-        const plots: any[] = [];
-        const energyPattern = /Total energy\s*:\s*([-\d.]+)/gi;
-        const energies: number[] = [];
-        let match;
-        while ((match = energyPattern.exec(content)) !== null) {
-            energies.push(parseFloat(match[1]));
-        }
-        if (energies.length > 0) {
-            plots.push({
-                title: 'Energy Convergence',
-                type: 'line',
-                x: energies.map((_, i) => i + 1),
-                y: energies,
-                xLabel: 'Iteration',
-                yLabel: 'Energy (a.u.)'
-            });
-        }
-        return plots;
+    const content = document.getText();
+    const plotData = this.extractPlotData(content, software);
+
+    this.panel.webview.html = this.getPlotterHtml(plotData, software);
+  }
+
+  private extractPlotData(content: string, software: QuantumChemistrySoftware): any {
+    const data: any = {
+      software,
+      plots: [],
+      metadata: {},
+    };
+
+    // Extract data based on software type
+    switch (software) {
+      case 'CP2K':
+        data.plots = this.extractCp2kData(content);
+        break;
+      case 'VASP':
+        data.plots = this.extractVaspData(content);
+        break;
+      case 'Gaussian':
+        data.plots = this.extractGaussianData(content);
+        break;
+      case 'ORCA':
+        data.plots = this.extractOrcaData(content);
+        break;
+      case 'Quantum ESPRESSO':
+        data.plots = this.extractQeData(content);
+        break;
+      case 'GAMESS':
+        data.plots = this.extractGamessData(content);
+        break;
+      case 'NWChem':
+        data.plots = this.extractNwchemData(content);
+        break;
     }
 
-    private extractVaspData(content: string): any[] {
-        const plots: any[] = [];
-        // Extract KPOINTS data
-        const kpointsMatch = content.match(/KPOINTS[\s\S]*?^\s*$/m);
-        if (kpointsMatch) {
-            const lines = kpointsMatch[0].split('\n');
-            if (lines.length > 3) {
-                const grid = lines[3].trim().split(/\s+/).map(Number);
-                plots.push({
-                    title: 'K-point Grid',
-                    type: 'bar',
-                    x: ['Kx', 'Ky', 'Kz'],
-                    y: grid,
-                    xLabel: 'Direction',
-                    yLabel: 'K-points'
-                });
-            }
-        }
-        return plots;
-    }
+    return data;
+  }
 
-    private extractGaussianData(content: string): any[] {
-        const plots: any[] = [];
-        // Extract SCF energies
-        const scfPattern = /SCF Done:\s*E\([^)]+\)\s*=\s*([-\d.]+)/gi;
-        const energies: number[] = [];
-        let match;
-        while ((match = scfPattern.exec(content)) !== null) {
-            energies.push(parseFloat(match[1]));
-        }
-        if (energies.length > 0) {
-            plots.push({
-                title: 'SCF Energy Convergence',
-                type: 'line',
-                x: energies.map((_, i) => i + 1),
-                y: energies,
-                xLabel: 'Cycle',
-                yLabel: 'Energy (a.u.)'
-            });
-        }
-        return plots;
+  private extractCp2kData(content: string): any[] {
+    // Extract energy convergence data
+    const plots: any[] = [];
+    const energyPattern = /Total energy\s*:\s*([-\d.]+)/gi;
+    const energies: number[] = [];
+    let match;
+    while ((match = energyPattern.exec(content)) !== null) {
+      energies.push(parseFloat(match[1]));
     }
-
-    private extractOrcaData(content: string): any[] {
-        const plots: any[] = [];
-        // Extract energy data from output-like content
-        const energyPattern = /FINAL SINGLE POINT ENERGY\s+([-\d.]+)/gi;
-        const energies: number[] = [];
-        let match;
-        while ((match = energyPattern.exec(content)) !== null) {
-            energies.push(parseFloat(match[1]));
-        }
-        if (energies.length > 0) {
-            plots.push({
-                title: 'Energy',
-                type: 'bar',
-                x: ['Final Energy'],
-                y: [energies[energies.length - 1]],
-                xLabel: '',
-                yLabel: 'Energy (a.u.)'
-            });
-        }
-        return plots;
+    if (energies.length > 0) {
+      plots.push({
+        title: 'Energy Convergence',
+        type: 'line',
+        x: energies.map((_, i) => i + 1),
+        y: energies,
+        xLabel: 'Iteration',
+        yLabel: 'Energy (a.u.)',
+      });
     }
+    return plots;
+  }
 
-    private extractQeData(content: string): any[] {
-        const plots: any[] = [];
-        // Extract SCF convergence
-        const energyPattern = /total energy\s*=\s*([-\d.]+)/gi;
-        const energies: number[] = [];
-        let match;
-        while ((match = energyPattern.exec(content)) !== null) {
-            energies.push(parseFloat(match[1]));
-        }
-        if (energies.length > 0) {
-            plots.push({
-                title: 'Total Energy Convergence',
-                type: 'line',
-                x: energies.map((_, i) => i + 1),
-                y: energies,
-                xLabel: 'Iteration',
-                yLabel: 'Energy (Ry)'
-            });
-        }
-        return plots;
+  private extractVaspData(content: string): any[] {
+    const plots: any[] = [];
+    // Extract KPOINTS data
+    const kpointsMatch = content.match(/KPOINTS[\s\S]*?^\s*$/m);
+    if (kpointsMatch) {
+      const lines = kpointsMatch[0].split('\n');
+      if (lines.length > 3) {
+        const grid = lines[3].trim().split(/\s+/).map(Number);
+        plots.push({
+          title: 'K-point Grid',
+          type: 'bar',
+          x: ['Kx', 'Ky', 'Kz'],
+          y: grid,
+          xLabel: 'Direction',
+          yLabel: 'K-points',
+        });
+      }
     }
+    return plots;
+  }
 
-    private extractGamessData(content: string): any[] {
-        const plots: any[] = [];
-        // Extract SCF data
-        const energyPattern = /TOTAL ENERGY\s*=\s*([-\d.]+)/gi;
-        const energies: number[] = [];
-        let match;
-        while ((match = energyPattern.exec(content)) !== null) {
-            energies.push(parseFloat(match[1]));
-        }
-        if (energies.length > 0) {
-            plots.push({
-                title: 'Total Energy',
-                type: 'line',
-                x: energies.map((_, i) => i + 1),
-                y: energies,
-                xLabel: 'Iteration',
-                yLabel: 'Energy (a.u.)'
-            });
-        }
-        return plots;
+  private extractGaussianData(content: string): any[] {
+    const plots: any[] = [];
+    // Extract SCF energies
+    const scfPattern = /SCF Done:\s*E\([^)]+\)\s*=\s*([-\d.]+)/gi;
+    const energies: number[] = [];
+    let match;
+    while ((match = scfPattern.exec(content)) !== null) {
+      energies.push(parseFloat(match[1]));
     }
-
-    private extractNwchemData(content: string): any[] {
-        const plots: any[] = [];
-        // Extract energy data
-        const energyPattern = /Total SCF energy\s*=\s*([-\d.]+)/gi;
-        const energies: number[] = [];
-        let match;
-        while ((match = energyPattern.exec(content)) !== null) {
-            energies.push(parseFloat(match[1]));
-        }
-        if (energies.length > 0) {
-            plots.push({
-                title: 'SCF Energy',
-                type: 'line',
-                x: energies.map((_, i) => i + 1),
-                y: energies,
-                xLabel: 'Iteration',
-                yLabel: 'Energy (a.u.)'
-            });
-        }
-        return plots;
+    if (energies.length > 0) {
+      plots.push({
+        title: 'SCF Energy Convergence',
+        type: 'line',
+        x: energies.map((_, i) => i + 1),
+        y: energies,
+        xLabel: 'Cycle',
+        yLabel: 'Energy (a.u.)',
+      });
     }
+    return plots;
+  }
 
-    private getPlotterHtml(data: any, software: QuantumChemistrySoftware): string {
-        const plotsJson = JSON.stringify(data.plots);
-        
-        return `<!DOCTYPE html>
+  private extractOrcaData(content: string): any[] {
+    const plots: any[] = [];
+    // Extract energy data from output-like content
+    const energyPattern = /FINAL SINGLE POINT ENERGY\s+([-\d.]+)/gi;
+    const energies: number[] = [];
+    let match;
+    while ((match = energyPattern.exec(content)) !== null) {
+      energies.push(parseFloat(match[1]));
+    }
+    if (energies.length > 0) {
+      plots.push({
+        title: 'Energy',
+        type: 'bar',
+        x: ['Final Energy'],
+        y: [energies[energies.length - 1]],
+        xLabel: '',
+        yLabel: 'Energy (a.u.)',
+      });
+    }
+    return plots;
+  }
+
+  private extractQeData(content: string): any[] {
+    const plots: any[] = [];
+    // Extract SCF convergence
+    const energyPattern = /total energy\s*=\s*([-\d.]+)/gi;
+    const energies: number[] = [];
+    let match;
+    while ((match = energyPattern.exec(content)) !== null) {
+      energies.push(parseFloat(match[1]));
+    }
+    if (energies.length > 0) {
+      plots.push({
+        title: 'Total Energy Convergence',
+        type: 'line',
+        x: energies.map((_, i) => i + 1),
+        y: energies,
+        xLabel: 'Iteration',
+        yLabel: 'Energy (Ry)',
+      });
+    }
+    return plots;
+  }
+
+  private extractGamessData(content: string): any[] {
+    const plots: any[] = [];
+    // Extract SCF data
+    const energyPattern = /TOTAL ENERGY\s*=\s*([-\d.]+)/gi;
+    const energies: number[] = [];
+    let match;
+    while ((match = energyPattern.exec(content)) !== null) {
+      energies.push(parseFloat(match[1]));
+    }
+    if (energies.length > 0) {
+      plots.push({
+        title: 'Total Energy',
+        type: 'line',
+        x: energies.map((_, i) => i + 1),
+        y: energies,
+        xLabel: 'Iteration',
+        yLabel: 'Energy (a.u.)',
+      });
+    }
+    return plots;
+  }
+
+  private extractNwchemData(content: string): any[] {
+    const plots: any[] = [];
+    // Extract energy data
+    const energyPattern = /Total SCF energy\s*=\s*([-\d.]+)/gi;
+    const energies: number[] = [];
+    let match;
+    while ((match = energyPattern.exec(content)) !== null) {
+      energies.push(parseFloat(match[1]));
+    }
+    if (energies.length > 0) {
+      plots.push({
+        title: 'SCF Energy',
+        type: 'line',
+        x: energies.map((_, i) => i + 1),
+        y: energies,
+        xLabel: 'Iteration',
+        yLabel: 'Energy (a.u.)',
+      });
+    }
+    return plots;
+  }
+
+  private getPlotterHtml(data: any, software: QuantumChemistrySoftware): string {
+    const plotsJson = JSON.stringify(data.plots);
+
+    return `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -372,5 +374,5 @@ export class DataPlotter {
     </script>
 </body>
 </html>`;
-    }
+  }
 }

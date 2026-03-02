@@ -5,7 +5,7 @@ export const window = {
   showErrorMessage: jest.fn(),
   activeTextEditor: undefined,
   createWebviewPanel: jest.fn(() => ({
-    webview: { 
+    webview: {
       html: '',
       onDidReceiveMessage: jest.fn(),
       postMessage: jest.fn(),
@@ -45,13 +45,13 @@ export const ViewColumn = {
 };
 
 export const Uri = {
-  file: jest.fn((path: string) => ({ 
-    path, 
+  file: jest.fn((path: string) => ({
+    path,
     fsPath: path,
     scheme: 'file',
     toString: () => path,
   })),
-  parse: jest.fn((uri: string) => ({ 
+  parse: jest.fn((uri: string) => ({
     path: uri,
     fsPath: uri,
     scheme: 'file',

@@ -37,43 +37,45 @@ describe('DataPlotter', () => {
     const mockEditor = {
       document: { fileName: '/test/random.txt', getText: () => 'random' },
     } as unknown as vscode.TextEditor;
-    
+
     plotter.show(mockEditor);
-    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('Unsupported file type for data plotting');
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Unsupported file type for data plotting'
+    );
   });
 
   it('should show with CP2K output file', () => {
     const mockEditor = {
-      document: { 
-        fileName: '/test/output.out', 
+      document: {
+        fileName: '/test/output.out',
         getText: () => 'Total energy: -76.0',
       },
     } as unknown as vscode.TextEditor;
-    
+
     plotter.show(mockEditor);
     // Should not show warning
   });
 
   it('should show with VASP OUTCAR file', () => {
     const mockEditor = {
-      document: { 
-        fileName: '/test/OUTCAR', 
+      document: {
+        fileName: '/test/OUTCAR',
         getText: () => 'energy  without entropy',
       },
     } as unknown as vscode.TextEditor;
-    
+
     plotter.show(mockEditor);
     // Should not show warning
   });
 
   it('should show with Gaussian log file', () => {
     const mockEditor = {
-      document: { 
-        fileName: '/test/molecule.log', 
+      document: {
+        fileName: '/test/molecule.log',
         getText: () => 'SCF Done',
       },
     } as unknown as vscode.TextEditor;
-    
+
     plotter.show(mockEditor);
     // Should not show warning
   });

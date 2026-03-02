@@ -26,50 +26,46 @@ import { QuantumChemistrySoftware } from '../managers/FileTypeDetector';
  * Create appropriate parser for the given software and content
  */
 export function createParser(
-    software: QuantumChemistrySoftware,
-    content: string,
-    filename?: string
+  software: QuantumChemistrySoftware,
+  content: string,
+  filename?: string
 ): BaseParser {
-    switch (software) {
-        case 'VASP':
-            return new VASPParser(content, filename || 'INCAR');
-        case 'Gaussian':
-            return new GaussianParser(content);
-        case 'ORCA':
-            return new ORCAParser(content);
-        case 'CP2K':
-            return new CP2KParser(content);
-        case 'Quantum ESPRESSO':
-            return new QEParser(content);
-        case 'GAMESS':
-            return new GAMESSParser(content);
-        case 'NWChem':
-            return new NWChemParser(content);
-        default:
-            throw new Error(`Unsupported software: ${software}`);
-    }
+  switch (software) {
+    case 'VASP':
+      return new VASPParser(content, filename || 'INCAR');
+    case 'Gaussian':
+      return new GaussianParser(content);
+    case 'ORCA':
+      return new ORCAParser(content);
+    case 'CP2K':
+      return new CP2KParser(content);
+    case 'Quantum ESPRESSO':
+      return new QEParser(content);
+    case 'GAMESS':
+      return new GAMESSParser(content);
+    case 'NWChem':
+      return new NWChemParser(content);
+    default:
+      throw new Error(`Unsupported software: ${software}`);
+  }
 }
 
 /**
  * Parse input file and return structured result
  */
-export function parseInput(
-    software: QuantumChemistrySoftware,
-    content: string,
-    filename?: string
-) {
-    const parser = createParser(software, content, filename);
-    return parser.parseInput();
+export function parseInput(software: QuantumChemistrySoftware, content: string, filename?: string) {
+  const parser = createParser(software, content, filename);
+  return parser.parseInput();
 }
 
 /**
  * Validate input file syntax
  */
 export function validateInput(
-    software: QuantumChemistrySoftware,
-    content: string,
-    filename?: string
+  software: QuantumChemistrySoftware,
+  content: string,
+  filename?: string
 ) {
-    const parser = createParser(software, content, filename);
-    return parser.validate();
+  const parser = createParser(software, content, filename);
+  return parser.validate();
 }

@@ -359,6 +359,7 @@
     "jest": "^29.7.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.1.1",
+    "sharp": "^0.34.5",
     "ts-jest": "^29.1.1",
     "typescript": "^5.3.3"
   },
@@ -373,5 +374,6 @@
     "url": "https://github.com/newtontech/OpenQC-VSCode/issues"
   },
   "homepage": "https://github.com/newtontech/OpenQC-VSCode#readme",
-  "license": "MIT"
+  "license": "MIT",
+  "icon": "icon.png"
 }

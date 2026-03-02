@@ -12,10 +12,10 @@ jest.mock('../../src/managers/FileTypeDetector', () => ({
       if (doc.fileName.includes('.com')) return 'Gaussian';
       return null;
     }),
-    getSoftwareInfo: jest.fn(() => ({ 
-      name: 'Test', 
-      description: 'Test Software', 
-      website: 'https://test.com' 
+    getSoftwareInfo: jest.fn(() => ({
+      name: 'Test',
+      description: 'Test Software',
+      website: 'https://test.com',
     })),
   })),
 }));
@@ -53,9 +53,11 @@ describe('StructureViewer', () => {
     const mockEditor = {
       document: { fileName: '/test/random.txt', getText: () => 'random' },
     } as unknown as vscode.TextEditor;
-    
+
     viewer.show(mockEditor);
-    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('Unsupported file type for structure visualization');
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Unsupported file type for structure visualization'
+    );
   });
 
   it('should show preview warning when no editor is provided', () => {
@@ -67,31 +69,33 @@ describe('StructureViewer', () => {
     const mockEditor = {
       document: { fileName: '/test/random.txt', getText: () => 'random' },
     } as unknown as vscode.TextEditor;
-    
+
     viewer.showPreview(mockEditor);
-    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('Unsupported file type for input preview');
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Unsupported file type for input preview'
+    );
   });
 
   it('should show with CP2K file', () => {
     const mockEditor = {
-      document: { 
-        fileName: '/test/cp2k.inp', 
+      document: {
+        fileName: '/test/cp2k.inp',
         getText: () => '&GLOBAL\nPROJECT test\n&END GLOBAL',
       },
     } as unknown as vscode.TextEditor;
-    
+
     viewer.show(mockEditor);
     // Should not show warning
   });
 
   it('should show preview with Gaussian file', () => {
     const mockEditor = {
-      document: { 
-        fileName: '/test/molecule.gjf', 
+      document: {
+        fileName: '/test/molecule.gjf',
         getText: () => '%chk=test.chk\n# B3LYP/6-31G*',
       },
     } as unknown as vscode.TextEditor;
-    
+
     viewer.showPreview(mockEditor);
     // Should not show warning
   });
