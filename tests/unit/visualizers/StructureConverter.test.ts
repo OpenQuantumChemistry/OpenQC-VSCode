@@ -1,83 +1,258 @@
+/**
+ * Tests for StructureConverter - Phase 2: 3D Visualization
+ *
+ * Tests the conversion of various quantum chemistry formats
+ * to the MolecularStructure format used by ThreeJsRenderer.
+ */
+
 import { StructureConverter } from '../../../src/visualizers/StructureConverter';
+import { Atom, MolecularStructure } from '../../../src/visualizers/types';
 
 describe('StructureConverter', () => {
-  describe('atomsToXYZ', () => {
-    it('converts atoms array to XYZ format string', () => {
-      const atoms = [
-        { elem: 'H', x: 0.0, y: 0.0, z: 0.0 },
-        { elem: 'O', x: 0.0, y: 0.0, z: 1.0 },
-      ];
+  let converter: StructureConverter;
 
-      const result = StructureConverter.atomsToXYZ(atoms, 'water');
+  beforeEach(() => {
+    converter = new StructureConverter();
+  });
 
-      expect(result).toContain('2');
-      expect(result).toContain('water');
-      expect(result).toMatch(/H\s+0\.0+\s+0\.0+\s+0\.0+/);
-      expect(result).toMatch(/O\s+0\.0+\s+0\.0+\s+1\.0+/);
+  describe('POSCAR conversion', () => {
+    it('should convert a simple POSCAR file', () => {
+      const poscarContent = `H2O molecule
+1.0
+10.0 0.0 0.0
+0.0 10.0 0.0
+0.0 0.0 10.0
+H O
+2 1
+Cartesian
+0.0 0.0 0.0
+0.0 0.0 0.74
+0.5 0.5 0.5
+`;
+
+      const result = converter.fromPOSCAR(poscarContent, 'test.poscar');
+
+      expect(result).toBeDefined();
+      expect(result.atoms).toHaveLength(3);
+      expect(result.name).toBe('test.poscar');
+      expect(result.atoms[0].element).toBe('H');
+      expect(result.atoms[2].element).toBe('O');
     });
 
-    it('handles empty atoms array', () => {
-      const result = StructureConverter.atomsToXYZ([], 'empty');
+    it('should extract lattice vectors from POSCAR', () => {
+      const poscarContent = `Simple cubic
+1.0
+5.0 0.0 0.0
+0.0 5.0 0.0
+0.0 0.0 5.0
+H
+1
+Cartesian
+0.0 0.0 0.0
+`;
 
-      expect(result).toContain('0');
-      expect(result).toContain('empty');
+      const result = converter.fromPOSCAR(poscarContent);
+
+      expect(result.lattice).toBeDefined();
+      expect(result.lattice?.a).toEqual([5.0, 0.0, 0.0]);
+      expect(result.lattice?.b).toEqual([0.0, 5.0, 0.0]);
+      expect(result.lattice?.c).toEqual([0.0, 0.0, 5.0]);
     });
 
-    it('formats coordinates with consistent precision', () => {
-      const atoms = [{ elem: 'C', x: 0.123456789, y: 1.23456789, z: 2.3456789 }];
+    it('should handle Direct coordinate mode', () => {
+      const poscarContent = `Test
+1.0
+10.0 0.0 0.0
+0.0 10.0 0.0
+0.0 0.0 10.0
+H
+1
+Direct
+0.5 0.5 0.5
+`;
 
-      const result = StructureConverter.atomsToXYZ(atoms, 'carbon');
+      const result = converter.fromPOSCAR(poscarContent);
 
-      // Should have consistent decimal places (6 is typical for XYZ)
-      const lines = result.split('\n');
-      const coordLine = lines[2]; // First atom line
-      const parts = coordLine.trim().split(/\s+/);
-
-      expect(parseFloat(parts[1])).toBeCloseTo(0.123457, 5);
-      expect(parseFloat(parts[2])).toBeCloseTo(1.234568, 5);
-      expect(parseFloat(parts[3])).toBeCloseTo(2.345679, 5);
-    });
-
-    it('handles special characters in comment', () => {
-      const atoms = [{ elem: 'Fe', x: 0, y: 0, z: 0 }];
-      const result = StructureConverter.atomsToXYZ(atoms, 'Iron oxide (Fe2O3)');
-
-      expect(result).toContain('Iron oxide (Fe2O3)');
+      expect(result.atoms).toHaveLength(1);
+      expect(result.atoms[0].element).toBe('H');
     });
   });
 
-  describe('atomsToJSON', () => {
-    it('converts atoms array to NGL-compatible JSON', () => {
-      const atoms = [
-        { elem: 'H', x: 0, y: 0, z: 0 },
-        { elem: 'O', x: 0, y: 0, z: 1 },
-      ];
+  describe('XYZ conversion', () => {
+    it('should convert a simple XYZ file', () => {
+      const xyzContent = `3
+Water molecule
+O 0.0 0.0 0.0
+H 0.96 0.0 0.0
+H -0.24 0.93 0.0
+`;
 
-      const result = StructureConverter.atomsToJSON(atoms);
-      const parsed = JSON.parse(result);
+      const result = converter.fromXYZ(xyzContent, 'water.xyz');
 
-      expect(parsed).toHaveProperty('atoms');
-      expect(parsed.atoms).toHaveLength(2);
-      expect(parsed.atoms[0]).toEqual({ elem: 'H', x: 0, y: 0, z: 0 });
-      expect(parsed.atoms[1]).toEqual({ elem: 'O', x: 0, y: 0, z: 1 });
+      expect(result.atoms).toHaveLength(3);
+      expect(result.atoms[0].element).toBe('O');
+      expect(result.atoms[1].element).toBe('H');
+      expect(result.atoms[2].element).toBe('H');
+      expect(result.name).toBe('water.xyz');
     });
 
-    it('includes unit cell data when provided', () => {
-      const atoms = [{ elem: 'Si', x: 0, y: 0, z: 0 }];
-      const unitCell = {
-        a: 5.43,
-        b: 5.43,
-        c: 5.43,
-        alpha: 90,
-        beta: 90,
-        gamma: 90,
+    it('should handle XYZ with comment lines', () => {
+      const xyzContent = `2
+# H2 molecule
+H 0.0 0.0 0.0
+H 0.0 0.0 0.74
+`;
+
+      const result = converter.fromXYZ(xyzContent);
+
+      expect(result.atoms).toHaveLength(2);
+    });
+
+    it('should throw error for invalid XYZ format', () => {
+      const invalidContent = `invalid
+content
+here`;
+
+      expect(() => converter.fromXYZ(invalidContent)).toThrow();
+    });
+  });
+
+  describe('Gaussian conversion', () => {
+    it('should convert Gaussian input format', () => {
+      const gaussianContent = `%chk=test.chk
+# HF/6-31G*
+
+Water
+
+0 1
+O 0.0 0.0 0.0
+H 0.96 0.0 0.0
+H -0.24 0.93 0.0
+`;
+
+      const result = converter.fromGaussian(gaussianContent, 'water.gjf');
+
+      expect(result.atoms).toHaveLength(3);
+      expect(result.atoms[0].element).toBe('O');
+    });
+  });
+
+  describe('ORCA conversion', () => {
+    it('should convert ORCA input format', () => {
+      const orcaContent = `! HF def2-SVP
+* xyz 0 1
+O 0.0 0.0 0.0
+H 0.96 0.0 0.0
+H -0.24 0.93 0.0
+*
+`;
+
+      const result = converter.fromORCA(orcaContent, 'water.inp');
+
+      expect(result.atoms).toHaveLength(3);
+      expect(result.atoms[0].element).toBe('O');
+    });
+  });
+
+  describe('Structure validation', () => {
+    it('should validate a correct structure', () => {
+      const structure: MolecularStructure = {
+        atoms: [
+          { element: 'H', x: 0, y: 0, z: 0 },
+          { element: 'O', x: 1, y: 0, z: 0 },
+        ],
       };
 
-      const result = StructureConverter.atomsToJSON(atoms, unitCell);
-      const parsed = JSON.parse(result);
+      const result = converter.validateStructure(structure);
 
-      expect(parsed).toHaveProperty('unitCell');
-      expect(parsed.unitCell).toEqual(unitCell);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should detect empty atoms array', () => {
+      const structure: MolecularStructure = {
+        atoms: [],
+      };
+
+      const result = converter.validateStructure(structure);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('No atoms found in structure');
+    });
+
+    it('should detect invalid coordinates', () => {
+      const structure: MolecularStructure = {
+        atoms: [
+          { element: 'H', x: NaN, y: 0, z: 0 },
+        ],
+      };
+
+      const result = converter.validateStructure(structure);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should warn about duplicate atoms', () => {
+      const structure: MolecularStructure = {
+        atoms: [
+          { element: 'H', x: 0, y: 0, z: 0 },
+          { element: 'H', x: 0.001, y: 0, z: 0 },
+        ],
+      };
+
+      const result = converter.validateStructure(structure);
+
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings[0]).toContain('very close');
+    });
+  });
+
+  describe('Auto-conversion', () => {
+    it('should detect POSCAR format from filename', () => {
+      const poscarContent = `Test
+1.0
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+H
+1
+Cartesian
+0.0 0.0 0.0
+`;
+
+      const result = converter.autoConvert(poscarContent, 'POSCAR');
+
+      expect(result.atoms).toHaveLength(1);
+    });
+
+    it('should detect XYZ format from filename', () => {
+      const xyzContent = `1
+Atom
+H 0.0 0.0 0.0
+`;
+
+      const result = converter.autoConvert(xyzContent, 'test.xyz');
+
+      expect(result.atoms).toHaveLength(1);
+    });
+
+    it('should detect Gaussian format from filename', () => {
+      const gaussianContent = `# HF/6-31G*
+
+0 1
+H 0.0 0.0 0.0
+`;
+
+      const result = converter.autoConvert(gaussianContent, 'test.gjf');
+
+      expect(result.atoms).toHaveLength(1);
+    });
+
+    it('should throw error for unknown format', () => {
+      expect(() =>
+        converter.autoConvert('random content', 'unknown.dat')
+      ).toThrow();
     });
   });
 });
