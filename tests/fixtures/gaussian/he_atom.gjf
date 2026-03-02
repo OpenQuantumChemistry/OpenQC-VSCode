@@ -1,0 +1,10 @@
+%mem=512MB
+%nprocshared=2
+%chk=he_atom.chk
+#p CCSD(T)/cc-pVQZ SP
+
+Helium atom high-level calculation
+
+0 1
+He     0.000000     0.000000     0.000000
+

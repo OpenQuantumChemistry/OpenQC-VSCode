@@ -45,7 +45,7 @@
     "booleans": {
       "patterns": [
         {
-          "match": "(?i)\\.?(TRUE|FALSE|T|F|ON|OFF|YES|NO|AUTO)\\.?",
+          "match": "(?i)\\b(TRUE|FALSE|ON|OFF|YES|NO|AUTO)\\b|(?i)\\b(T|F)\\b",
           "name": "constant.language.boolean.vasp"
         }
       ]

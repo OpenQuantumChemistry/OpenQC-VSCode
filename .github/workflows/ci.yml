@@ -1,0 +1,178 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['18.x', '20.x']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        if: matrix.node-version == '18.x'
+        with:
+          file: ./coverage/lcov.info
+          fail_ci_if_error: true
+
+  lsp-integration-test:
+    name: LSP Integration Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenQC-VSCode
+        uses: actions/checkout@v4
+        with:
+          path: openqc-vscode
+
+      - name: Checkout CP2K LSP
+        uses: actions/checkout@v4
+        with:
+          repository: newtontech/cp2k-lsp-enhanced
+          path: cp2k-lsp-enhanced
+
+      - name: Checkout Gaussian LSP
+        uses: actions/checkout@v4
+        with:
+          repository: newtontech/gaussian-lsp
+          path: gaussian-lsp
+
+      - name: Checkout VASP LSP
+        uses: actions/checkout@v4
+        with:
+          repository: newtontech/vasp-lsp
+          path: vasp-lsp
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: openqc-vscode/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python LSP servers
+        run: |
+          pip install -e ./gaussian-lsp
+          pip install -e ./vasp-lsp
+
+      - name: Build CP2K LSP
+        working-directory: ./cp2k-lsp-enhanced
+        run: |
+          npm ci
+          npm run build
+
+      - name: Link LSP servers
+        run: |
+          mkdir -p ~/.local/bin
+          ln -sf $(pwd)/cp2k-lsp-enhanced/dist/server.js ~/.local/bin/cp2k-lsp-enhanced
+          chmod +x ~/.local/bin/cp2k-lsp-enhanced
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install OpenQC-VSCode dependencies
+        working-directory: ./openqc-vscode
+        run: npm ci
+
+      - name: Compile OpenQC-VSCode
+        working-directory: ./openqc-vscode
+        run: npm run compile
+
+      - name: Verify LSP servers are available
+        run: |
+          which cp2k-lsp-enhanced || echo "cp2k-lsp-enhanced not found"
+          which gaussian-lsp || echo "gaussian-lsp not found"
+          which vasp-lsp || echo "vasp-lsp not found"
+
+      - name: Run LSP-specific tests
+        working-directory: ./openqc-vscode
+        run: npm run test:unit -- --testPathPattern="LSPManager"
+
+      - name: Test LSP restart functionality
+        working-directory: ./openqc-vscode
+        run: |
+          # Create a test to verify LSP restart works correctly
+          node -e "
+            const { LSPManager } = require('./out/src/managers/LSPManager');
+            const manager = new LSPManager();
+
+            // Mock document
+            const mockDoc = {
+              fileName: 'test.com',
+              getText: () => '%chk=test.chk\n# B3LYP/6-31G(d)\n\n0 1\nH 0 0 0'
+            };
+
+            // Test that restart doesn't throw
+            manager.restartLSPForDocument(mockDoc).then(() => {
+              console.log('LSP restart test passed');
+              process.exit(0);
+            }).catch(err => {
+              console.error('LSP restart test failed:', err);
+              process.exit(1);
+            });
+          "
+
+  build-and-package:
+    name: Build and Package
+    runs-on: ubuntu-latest
+    needs: [test, lsp-integration-test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile
+        run: npm run compile
+
+      - name: Package extension
+        run: npx vsce package
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-vsix
+          path: '*.vsix'

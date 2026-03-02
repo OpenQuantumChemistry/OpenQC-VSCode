@@ -40,11 +40,18 @@ export class LSPManager {
       return;
     }
 
-    const client = await this.createLanguageClient(software, serverConfig, document);
-    if (client) {
-      this.clients.set(languageId, client);
-      await client.start();
-      vscode.window.showInformationMessage(`${software} Language Server started`);
+    try {
+      const client = await this.createLanguageClient(software, serverConfig, document);
+      if (client) {
+        this.clients.set(languageId, client);
+        await client.start();
+        vscode.window.showInformationMessage(`${software} Language Server started`);
+      }
+    } catch (error) {
+      console.error(`Error starting ${software} Language Server:`, error);
+      vscode.window.showErrorMessage(`Failed to start ${software} Language Server: ${error}`);
+      // Clean up the client if it was added
+      this.clients.delete(languageId);
     }
   }
 
@@ -57,14 +64,37 @@ export class LSPManager {
     const languageId = this.getLanguageId(software);
     const client = this.clients.get(languageId);
     if (client) {
-      await client.stop();
-      this.clients.delete(languageId);
+      try {
+        // Check if client is running before stopping
+        if (client.needsStop()) {
+          await client.stop();
+        }
+      } catch (error) {
+        console.error(`Error stopping ${software} Language Server:`, error);
+        vscode.window.showWarningMessage(`Error stopping ${software} Language Server: ${error}`);
+      } finally {
+        // Always remove from clients map to allow restart
+        this.clients.delete(languageId);
+      }
     }
   }
 
   async restartLSPForDocument(document: vscode.TextDocument): Promise<void> {
-    await this.stopLSPForDocument(document);
-    await this.startLSPForDocument(document);
+    const software = this.fileTypeDetector.detectSoftware(document);
+    if (!software) {
+      vscode.window.showWarningMessage('Could not detect quantum chemistry software for this file');
+      return;
+    }
+
+    try {
+      await this.stopLSPForDocument(document);
+      // Add a small delay to ensure the process is fully terminated
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await this.startLSPForDocument(document);
+    } catch (error) {
+      console.error(`Error restarting ${software} Language Server:`, error);
+      vscode.window.showErrorMessage(`Failed to restart ${software} Language Server: ${error}`);
+    }
   }
 
   private async createLanguageClient(
@@ -72,27 +102,45 @@ export class LSPManager {
     config: LSPServerConfig,
     document: vscode.TextDocument
   ): Promise<LanguageClient | undefined> {
-    const serverOptions: ServerOptions = {
-      command: config.path,
-      args: config.args,
-      transport: TransportKind.stdio,
-    };
+    try {
+      // Verify the LSP executable exists
+      const { exec } = require('child_process');
+      const { promisify } = require('util');
+      const execAsync = promisify(exec);
 
-    const clientOptions: LanguageClientOptions = {
-      documentSelector: [{ scheme: 'file', language: this.getLanguageId(software) }],
-      synchronize: {
-        fileEvents: vscode.workspace.createFileSystemWatcher(
-          `**/*.{${this.getExtensions(software).join(',')}}`
-        ),
-      },
-    };
+      try {
+        await execAsync(`which ${config.path}`);
+      } catch {
+        throw new Error(
+          `LSP executable '${config.path}' not found in PATH. Please install ${software} LSP server.`
+        );
+      }
 
-    return new LanguageClient(
-      `openqc-${software.toLowerCase()}`,
-      `OpenQC ${software} Language Server`,
-      serverOptions,
-      clientOptions
-    );
+      const serverOptions: ServerOptions = {
+        command: config.path,
+        args: config.args,
+        transport: TransportKind.stdio,
+      };
+
+      const clientOptions: LanguageClientOptions = {
+        documentSelector: [{ scheme: 'file', language: this.getLanguageId(software) }],
+        synchronize: {
+          fileEvents: vscode.workspace.createFileSystemWatcher(
+            `**/*.{${this.getExtensions(software).join(',')}}`
+          ),
+        },
+      };
+
+      return new LanguageClient(
+        `openqc-${software.toLowerCase()}`,
+        `OpenQC ${software} Language Server`,
+        serverOptions,
+        clientOptions
+      );
+    } catch (error) {
+      console.error(`Failed to create LanguageClient for ${software}:`, error);
+      throw error;
+    }
   }
 
   private getServerConfig(software: QuantumChemistrySoftware): LSPServerConfig {
@@ -132,9 +180,18 @@ export class LSPManager {
   }
 
   dispose(): void {
-    this.clients.forEach(async client => {
-      await client.stop();
+    const stopPromises = Array.from(this.clients.entries()).map(async ([languageId, client]) => {
+      try {
+        if (client.needsStop()) {
+          await client.stop();
+        }
+      } catch (error) {
+        console.error(`Error stopping ${languageId} Language Server during dispose:`, error);
+      }
     });
-    this.clients.clear();
+
+    Promise.all(stopPromises).then(() => {
+      this.clients.clear();
+    });
   }
 }
