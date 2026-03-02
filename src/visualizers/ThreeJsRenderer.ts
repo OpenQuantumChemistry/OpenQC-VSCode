@@ -116,7 +116,9 @@ export class ThreeJsRenderer {
    * Setup lighting for the scene
    */
   private setupLighting(): void {
-    if (!this.scene) return;
+    if (!this.scene) {
+      return;
+    }
 
     // Ambient light for overall illumination
     this.ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -132,7 +134,9 @@ export class ThreeJsRenderer {
    * Add axes helper to the scene
    */
   private addAxesHelper(): void {
-    if (!this.scene) return;
+    if (!this.scene) {
+      return;
+    }
 
     this.axesHelper = new THREE.AxesHelper(5);
     this.scene.add(this.axesHelper);
@@ -142,7 +146,9 @@ export class ThreeJsRenderer {
    * Update renderer size based on container
    */
   private updateRendererSize(): void {
-    if (!this.renderer || !this.container) return;
+    if (!this.renderer || !this.container) {
+      return;
+    }
 
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
@@ -362,7 +368,9 @@ export class ThreeJsRenderer {
    * Clear all atom meshes from the scene
    */
   private clearAtoms(): void {
-    if (!this.scene) return;
+    if (!this.scene) {
+      return;
+    }
 
     this.atomMeshes.forEach(mesh => {
       this.scene!.remove(mesh);
@@ -381,7 +389,9 @@ export class ThreeJsRenderer {
    * Detect and render bonds between atoms
    */
   public detectAndRenderBonds(): void {
-    if (!this.config.showBonds) return;
+    if (!this.config.showBonds) {
+      return;
+    }
 
     // Clear existing bonds
     this.clearBonds();
@@ -447,7 +457,9 @@ export class ThreeJsRenderer {
     const atom1 = this.atoms[bond.atomIndex1];
     const atom2 = this.atoms[bond.atomIndex2];
 
-    if (!atom1 || !atom2) return null;
+    if (!atom1 || !atom2) {
+      return null;
+    }
 
     // Create cylinder for bond
     const direction = new THREE.Vector3(atom2.x - atom1.x, atom2.y - atom1.y, atom2.z - atom1.z);
@@ -489,7 +501,9 @@ export class ThreeJsRenderer {
    * Clear all bond meshes from the scene
    */
   private clearBonds(): void {
-    if (!this.scene) return;
+    if (!this.scene) {
+      return;
+    }
 
     this.bondMeshes.forEach(mesh => {
       this.scene!.remove(mesh);
@@ -570,7 +584,9 @@ export class ThreeJsRenderer {
    * Clear unit cell from the scene
    */
   private clearUnitCell(): void {
-    if (!this.scene || !this.unitCellLines) return;
+    if (!this.scene || !this.unitCellLines) {
+      return;
+    }
 
     this.scene.remove(this.unitCellLines);
     this.unitCellLines.geometry.dispose();
@@ -582,7 +598,9 @@ export class ThreeJsRenderer {
    * Center camera on the molecular structure
    */
   private centerCameraOnStructure(): void {
-    if (!this.camera || this.atoms.length === 0) return;
+    if (!this.camera || this.atoms.length === 0) {
+      return;
+    }
 
     // Calculate bounding box
     const box = new THREE.Box3();
@@ -609,7 +627,9 @@ export class ThreeJsRenderer {
    * Rotate camera
    */
   public rotateCamera(deltaX: number, deltaY: number): void {
-    if (!this.camera) return;
+    if (!this.camera) {
+      return;
+    }
 
     // Simple orbital rotation around target
     const theta = (deltaX * Math.PI) / 180;
@@ -647,7 +667,9 @@ export class ThreeJsRenderer {
    * Zoom camera
    */
   public zoomCamera(factor: number): void {
-    if (!this.camera) return;
+    if (!this.camera) {
+      return;
+    }
 
     this.cameraState.zoom *= factor;
 
@@ -670,7 +692,9 @@ export class ThreeJsRenderer {
    * Pan camera
    */
   public panCamera(dx: number, dy: number, dz: number): void {
-    if (!this.camera) return;
+    if (!this.camera) {
+      return;
+    }
 
     this.camera.position.x += dx;
     this.camera.position.y += dy;
@@ -685,7 +709,9 @@ export class ThreeJsRenderer {
    * Reset camera to default position
    */
   public resetCamera(): void {
-    if (!this.camera) return;
+    if (!this.camera) {
+      return;
+    }
 
     this.cameraState = this.getDefaultCameraState();
 
@@ -712,7 +738,9 @@ export class ThreeJsRenderer {
    * Update container size
    */
   public updateSize(width: number, height: number): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     this.container.style.width = `${width}px`;
     this.container.style.height = `${height}px`;
@@ -803,7 +831,9 @@ export class ThreeJsRenderer {
    * Dispose of all resources
    */
   public dispose(): void {
-    if (!this.isInitializedFlag) return;
+    if (!this.isInitializedFlag) {
+      return;
+    }
 
     // Stop animation
     this.stopAnimationLoop();

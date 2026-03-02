@@ -176,7 +176,9 @@ export class StructureConverter {
 
     for (let i = 2; i < Math.min(lines.length, numAtoms + 2); i++) {
       const line = lines[i].trim();
-      if (!line || line.startsWith('#')) continue;
+      if (!line || line.startsWith('#')) {
+        continue;
+      }
 
       const parts = line.split(/\s+/);
       if (parts.length >= 4) {
