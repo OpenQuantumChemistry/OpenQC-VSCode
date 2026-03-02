@@ -225,7 +225,7 @@ export class Molecule3D {
             }
             
             // Skip title and symmetry lines
-            if (inAtoms && line.trim().length === 0) continue;
+            if (inData && line.trim().length === 0) continue;
             
             // Parse atom lines in GAMESS format
             if (inData) {

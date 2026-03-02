@@ -40,44 +40,93 @@
     "languages": [
       {
         "id": "cp2k",
-        "aliases": ["CP2K", "cp2k"],
-        "extensions": [".inp"],
+        "aliases": [
+          "CP2K",
+          "cp2k"
+        ],
+        "extensions": [
+          ".inp"
+        ],
         "configuration": "./language-configurations/cp2k.json"
       },
       {
         "id": "vasp",
-        "aliases": ["VASP", "vasp"],
-        "filenames": ["INCAR", "POSCAR", "KPOINTS", "POTCAR"],
+        "aliases": [
+          "VASP",
+          "vasp"
+        ],
+        "filenames": [
+          "INCAR",
+          "POSCAR",
+          "KPOINTS",
+          "POTCAR"
+        ],
         "configuration": "./language-configurations/vasp.json"
       },
       {
         "id": "gaussian",
-        "aliases": ["Gaussian", "gaussian"],
-        "extensions": [".gjf", ".com"],
+        "aliases": [
+          "Gaussian",
+          "gaussian"
+        ],
+        "extensions": [
+          ".gjf",
+          ".com"
+        ],
         "configuration": "./language-configurations/gaussian.json"
       },
       {
         "id": "orca",
-        "aliases": ["ORCA", "orca"],
-        "extensions": [".inp"],
+        "aliases": [
+          "ORCA",
+          "orca"
+        ],
+        "extensions": [
+          ".inp"
+        ],
         "configuration": "./language-configurations/orca.json"
       },
       {
         "id": "qe",
-        "aliases": ["Quantum ESPRESSO", "QE", "quantum espresso"],
-        "extensions": [".in", ".pw.in", ".relax.in", ".vc-relax.in", ".scf.in", ".nscf.in", ".bands.in", ".ph.in", ".dos.in"],
+        "aliases": [
+          "Quantum ESPRESSO",
+          "QE",
+          "quantum espresso"
+        ],
+        "extensions": [
+          ".in",
+          ".pw.in",
+          ".relax.in",
+          ".vc-relax.in",
+          ".scf.in",
+          ".nscf.in",
+          ".bands.in",
+          ".ph.in",
+          ".dos.in"
+        ],
         "configuration": "./language-configurations/qe.json"
       },
       {
         "id": "gamess",
-        "aliases": ["GAMESS", "gamess"],
-        "extensions": [".inp"],
+        "aliases": [
+          "GAMESS",
+          "gamess"
+        ],
+        "extensions": [
+          ".inp"
+        ],
         "configuration": "./language-configurations/gamess.json"
       },
       {
         "id": "nwchem",
-        "aliases": ["NWChem", "nwchem"],
-        "extensions": [".nw", ".nwinp"],
+        "aliases": [
+          "NWChem",
+          "nwchem"
+        ],
+        "extensions": [
+          ".nw",
+          ".nwinp"
+        ],
         "configuration": "./language-configurations/nwchem.json"
       }
     ],
@@ -225,13 +274,21 @@
         },
         "openqc.visualization.moleculeRenderer": {
           "type": "string",
-          "enum": ["3Dmol.js", "NGL", "VTK"],
+          "enum": [
+            "3Dmol.js",
+            "NGL",
+            "VTK"
+          ],
           "default": "3Dmol.js",
           "description": "Default molecule renderer"
         },
         "openqc.visualization.plotLibrary": {
           "type": "string",
-          "enum": ["Plotly.js", "Chart.js", "D3.js"],
+          "enum": [
+            "Plotly.js",
+            "Chart.js",
+            "D3.js"
+          ],
           "default": "Plotly.js",
           "description": "Default plotting library"
         },
@@ -271,16 +328,21 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile \u0026\u0026 npm run lint",
+    "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/src/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
+    "@types/glob": "^8.1.0",
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "18.x",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^8.56.0",
+    "glob": "^13.0.6",
     "typescript": "^5.3.3"
   },
   "dependencies": {
