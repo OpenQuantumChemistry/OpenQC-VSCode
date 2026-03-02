@@ -20,35 +20,39 @@ jest.mock('util', () => {
 import { FormatConverter, SupportedFormat, type ConversionResult } from '../../../src/converters';
 
 // Mock vscode module
-jest.mock('vscode', () => ({
-  window: {
-    createOutputChannel: jest.fn(() => ({
-      appendLine: jest.fn(),
-      dispose: jest.fn(),
-    })),
-    showInformationMessage: jest.fn(),
-    showErrorMessage: jest.fn(),
-    activeTextEditor: {
-      document: {
-        uri: { fsPath: '/test/input.xyz' },
+jest.mock(
+  'vscode',
+  () => ({
+    window: {
+      createOutputChannel: jest.fn(() => ({
+        appendLine: jest.fn(),
+        dispose: jest.fn(),
+      })),
+      showInformationMessage: jest.fn(),
+      showErrorMessage: jest.fn(),
+      activeTextEditor: {
+        document: {
+          uri: { fsPath: '/test/input.xyz' },
+        },
       },
     },
-  },
-  workspace: {
-    openTextDocument: jest.fn(),
-    fs: {
-      readFile: jest.fn(),
+    workspace: {
+      openTextDocument: jest.fn(),
+      fs: {
+        readFile: jest.fn(),
+      },
     },
-  },
-  env: {
-    clipboard: {
-      writeText: jest.fn(),
+    env: {
+      clipboard: {
+        writeText: jest.fn(),
+      },
     },
-  },
-  Uri: {
-    file: jest.fn((path) => ({ fsPath: path })),
-  },
-}), { virtual: true });
+    Uri: {
+      file: jest.fn(path => ({ fsPath: path })),
+    },
+  }),
+  { virtual: true }
+);
 
 // Mock child_process
 jest.mock('child_process', () => ({
@@ -230,7 +234,9 @@ describe('FormatConverter', () => {
 
       it('should return false when dpdata is not installed', async () => {
         mockExecAsync.mockResolvedValueOnce({ stdout: 'Python 3.9.0', stderr: '' });
-        mockExecAsync.mockRejectedValueOnce(new Error('ModuleNotFoundError: No module named dpdata'));
+        mockExecAsync.mockRejectedValueOnce(
+          new Error('ModuleNotFoundError: No module named dpdata')
+        );
 
         const result = await converter.checkBackend();
         expect(result).toBe(false);
@@ -282,7 +288,7 @@ describe('FormatConverter', () => {
           '/test/input',
           '/test/output',
           SupportedFormat.VASP,
-          SupportedFormat.XYZ,
+          SupportedFormat.XYZ
         );
 
         expect(result.success).toBe(true);
@@ -323,7 +329,7 @@ describe('FormatConverter', () => {
         const result = await converter.batchConvert(
           ['/test/file1.xyz', '/test/file2.xyz', '/test/file3.xyz'],
           '/test/output',
-          SupportedFormat.VASP,
+          SupportedFormat.VASP
         );
 
         expect(result.success).toBe(true);
@@ -348,7 +354,7 @@ describe('FormatConverter', () => {
         const result = await converter.batchConvert(
           ['/test/file1.xyz', '/test/file2.xyz', '/test/file3.xyz'],
           '/test/output',
-          SupportedFormat.VASP,
+          SupportedFormat.VASP
         );
 
         expect(result.success).toBe(false);
@@ -364,7 +370,7 @@ describe('FormatConverter', () => {
           ['/test/input.xyz'],
           '/test/output',
           SupportedFormat.VASP,
-          SupportedFormat.XYZ,
+          SupportedFormat.XYZ
         );
 
         expect(result.total).toBe(1);

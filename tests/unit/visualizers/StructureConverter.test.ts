@@ -182,9 +182,7 @@ H -0.24 0.93 0.0
 
     it('should detect invalid coordinates', () => {
       const structure: MolecularStructure = {
-        atoms: [
-          { element: 'H', x: NaN, y: 0, z: 0 },
-        ],
+        atoms: [{ element: 'H', x: NaN, y: 0, z: 0 }],
       };
 
       const result = converter.validateStructure(structure);
@@ -250,9 +248,7 @@ H 0.0 0.0 0.0
     });
 
     it('should throw error for unknown format', () => {
-      expect(() =>
-        converter.autoConvert('random content', 'unknown.dat')
-      ).toThrow();
+      expect(() => converter.autoConvert('random content', 'unknown.dat')).toThrow();
     });
   });
 });

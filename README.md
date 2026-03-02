@@ -1,327 +1,254 @@
-# OpenQC-VSCode
+# OpenQC
 
-> **Universal VS Code extension for quantum chemistry software with multi-LSP support and advanced visualization**
+<div align="center">
 
+**Your Universal Gateway to Computational Chemistry**
+
+*Parse, visualize, and analyze ANY DFT/quantum chemistry/MD input files with one powerful extension*
+
+[![Install](https://img.shields.io/badge/VS%20Code-Install-blue?logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=newtontech.openqc)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://github.com/newtontech/OpenQC-VSCode/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/newtontech/OpenQC-VSCode/actions)
-[![Coverage](https://codecov.io/gh/newtontech/OpenQC-VSCode/branch/main/graph/badge.svg)](https://codecov.io/gh/newtontech/OpenQC-VSCode/branch/main/graph/badge.svg)
 
-## 🚀 What's New in v2.0
+[Features](#-supported-software) • [Quick Start](#-quick-start) • [Gallery](#-gallery) • [Roadmap](#-whats-coming)
 
-**OpenQC-VSCode is now a universal platform for quantum chemistry!** We've expanded from a single-tool focus to supporting **7 major quantum chemistry packages** with automatic LSP detection and unified visualization.
+</div>
 
-### Major Features
-- ✅ **Universal LSP Support** - Auto-detect and launch language servers for 7 quantum chemistry packages
-- ✅ **Molecular Visualization** - Interactive 3D rendering with 3Dmol.js
-- ✅ **Data Visualization** - Plot SCF energies, convergence data with Plotly.js
-- ✅ **Input Preview** - Structured preview of input file parameters
-- ✅ **Developer Tools** - Syntax highlighting, validation, and LSP diagnostics
+---
 
-## Features
+## 🧪 Why OpenQC?
 
-### 🎯 Core Capabilities
+Tired of switching between different editors for VASP, Gaussian, ORCA, CP2K, and other quantum chemistry software? **OpenQC** brings everything together in one place.
 
-- **🚀 Universal LSP Support**: Automatic detection and management of language servers for:
-  - CP2K
-  - VASP
-  - Gaussian
-  - ORCA
-  - Quantum ESPRESSO
-  - GAMESS
-  - NWChem
+**OpenQC automatically recognizes and parses your computational chemistry files** — whether you're doing DFT calculations, molecular dynamics, or wavefunction analysis. Just open your file and start working.
 
-- **🔬 Molecular Visualization**: Interactive 3D structure rendering with 3Dmol.js
-  - Multiple visualization styles: stick, sphere, line, cartoon
-  - Spin and zoom controls
-  - Real-time structure preview from input files
+---
 
-- **📊 Data Visualization**: Plot calculation data with Plotly.js
-  - SCF energy convergence
-  - K-point grids
-  - Automatic data extraction from output files
-  - Interactive and responsive charts
+## 🎯 Supported Software
 
-- **📝 Input Preview**: Structured display of input file parameters
-  - Section-based organization
-  - Parameter extraction and display
-  - Syntax highlighting for all formats
+We support **10+ major computational chemistry packages** with more on the way:
 
-- **🛠️ Developer Tools**:
-  - Syntax highlighting for all 7 quantum chemistry formats
-  - File type auto-detection
-  - Language server management (start/stop/restart)
-  - Error diagnostics from LSPs
+### ✅ Fully Supported (Now)
 
-### 🔬 Supported Quantum Chemistry Packages
+| Software | File Types | Features |
+|----------|-----------|----------|
+| **VASP** | `INCAR`, `POSCAR`, `KPOINTS`, `POTCAR` | Visualization + Syntax |
+| **Gaussian** | `.com`, `.gjf` | Visualization + Syntax |
+| **ORCA** | `.inp` | Visualization + Syntax |
+| **CP2K** | `.inp` | Visualization + Syntax |
+| **Quantum ESPRESSO** | `.in`, `.pw.in`, `.relax.in` | Visualization + Syntax |
+| **GAMESS (US)** | `.inp` | Visualization + Syntax |
+| **NWChem** | `.nw`, `.nwinp` | Visualization + Syntax |
+| **Q-Chem** | `.in` | Syntax Highlighting |
+| **ADF** | `.adf`, `.adfinput` | Syntax Highlighting |
+| **TeraChem** | `.inp` | Syntax Highlighting |
 
-| Package | Language ID | Files | Syntax | Visualization | LSP |
-|---------|--------------|-------|--------|---------------|-----|
-| **CP2K** | `cp2k` | `.inp` | ✅ | ✅ | ✅ |
-| **VASP** | `vasp` | `INCAR`, `POSCAR`, `KPOINTS`, `POTCAR` | ✅ | ✅ | ✅ |
-| **Gaussian** | `gaussian` | `.gjf`, `.com` | ✅ | ✅ | ✅ |
-| **ORCA** | `orca` | `.inp` | ✅ | ✅ | ✅ |
-| **Quantum ESPRESSO** | `qe` | `.in`, `.pw.in`, `.relax.in`, etc. | ✅ | ✅ | ✅ |
-| **GAMESS** | `gamess` | `.inp` | ✅ | ✅ | ✅ |
-| **NWChem** | `nwchem` | `.nw`, `.nwinp` | ✅ | ✅ | ✅ |
+### 🚧 Coming Soon
 
-## Installation
+- **Molpro** - High-accuracy quantum chemistry
+- **Psi4** - Open-source quantum chemistry
+- **Molcas/OpenMolcas** - Multiconfigurational methods
+- **DALTON** - Molecular properties
+- **Turbomole** - Efficient DFT calculations
+- **Crystal** - Periodic systems
+- **Castep** - Materials modeling
+- **Abinit** - Package for pseudopotential calculations
 
-### From VSCode Marketplace
+---
 
-1. Open VSCode
-2. Press `Ctrl+Shift+X` (Windows/Linux) or `Cmd+Shift+X` (macOS)
-3. Search for "OpenQC-VSCode"
-4. Click "Install"
+## ✨ What Can You Do?
 
-### From Source
+### 🔬 Visualize Molecules in 3D
 
-```bash
-git clone https://github.com/newtontech/OpenQC-VSCode.git
-cd OpenQC-VSCode
-npm install
-npm run compile
-# Package and install locally
-npx vsce package
-code --install-extension openqc-vscode-*.vsix
+Open any input file and instantly see your molecular structure in beautiful 3D:
+
+- **Rotate, zoom, and pan** to explore your system
+- **Multiple rendering styles** — ball-and-stick, space-filling, wireframe
+- **Real-time preview** — see changes as you edit
+- Support for **molecules, crystals, and surfaces**
+
+### 📊 Analyze Your Calculations
+
+Extract and visualize key data from your output files:
+
+- SCF convergence plots
+- Energy optimization progress
+- Geometry optimization trajectories
+- Molecular dynamics evolution
+
+### 📝 Write Better Input Files
+
+- **Syntax highlighting** for all supported formats
+- **Error detection** as you type
+- **Parameter validation** before you run
+- **Smart completion** for common keywords
+
+### 🗂️ Organize Your Work
+
+- Built-in **Molecules sidebar** to track your systems
+- **Job tracking** panel for monitoring calculations
+- Quick access to recent files and projects
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install OpenQC
+
+Search for **"OpenQC"** in the VS Code Extensions panel and click Install.
+
+### 2. Open Your File
+
+Open any computational chemistry file:
+
+```
+POSCAR          # VASP structure
+job.com         # Gaussian input
+calc.inp        # ORCA/CP2K input
 ```
 
-## Quick Start
+OpenQC **automatically detects** the file type and activates the right tools.
 
-### 1. Open a Quantum Chemistry File
+### 3. Visualize
 
-Open any supported file (e.g., `POSCAR`, `input.com`, `job.inp`) in VSCode.
-The extension will **automatically detect** the file type and launch the appropriate language server.
+Click the 🧪 icon in the editor toolbar to see your structure in 3D!
 
-### 2. Visualize Molecular Structure
+### 4. Analyze
 
-- **Option 1**: Click the structure icon in the editor title bar
-- **Option 2**: Press `Ctrl+Shift+P` and run `OpenQC: Visualize Structure`
-- **Option 3**: Right-click and select "OpenQC: Visualize Structure"
+Use the 📊 icon to plot your calculation data.
 
-### 3. Plot Calculation Data
+---
 
-- **Option 1**: Click the plot icon in the editor title bar
-- **Option 2**: Press `Ctrl+Shift+P` and run `OpenQC: Plot Calculation Data`
+## 🎨 Gallery
 
-### 4. Preview Input File
+### Molecular Visualization
+*See your molecules come to life with interactive 3D rendering*
 
-- **Option 1**: Press `Ctrl+Shift+P` and run `OpenQC: Preview Input File`
-- **Option 2**: Right-click and select "OpenQC: Preview Input File"
-
-### 5. Manage Language Servers
-
-```bash
-# Start language server
-Ctrl+Shift+P > OpenQC: Start Language Server
-
-# Stop language server
-Ctrl+Shift+P > OpenQC: Stop Language Server
-
-# Restart language server
-Ctrl+Shift+P > OpenQC: Restart Language Server
+```
+┌─────────────────────────────────────┐
+│         [3D Viewer Panel]           │
+│                                     │
+│      ◯────◯────◯                   │
+│     ╱      ╲     ╲                  │
+│    ◯        ◯───◯                  │
+│                                     │
+│   Benzene • C₆H₆ • 12 atoms         │
+└─────────────────────────────────────┘
 ```
 
-## Configuration
+### Syntax Highlighting
+*Your input files, beautifully formatted*
 
-### LSP Configuration
+```
+&FORCE_EVAL
+  SUBSYS
+    &KIND O
+      BASIS_SET DZVP-MOLOPT-SR-GTH
+      POTENTIAL GTH-PBE-q6
+    &END KIND
+    &COORD
+      O  0.000000  0.000000  0.000000
+      H  0.758602  0.000000 -0.504284
+    &END COORD
+  &END SUBSYS
+&END FORCE_EVAL
+```
 
-Configure language server paths in your `settings.json`:
+---
+
+## 🔧 Configuration
+
+OpenQC works out of the box, but you can customize it:
 
 ```json
 {
-  "openqc.lsp.cp2k.enabled": true,
-  "openqc.lsp.cp2k.path": "cp2k-lsp-enhanced",
-  
-  "openqc.lsp.vasp.enabled": true,
-  "openqc.lsp.vasp.path": "vasp-lsp",
-  
-  "openqc.lsp.gaussian.enabled": true,
-  "openqc.lsp.gaussian.path": "gaussian-lsp",
-  
-  "openqc.lsp.orca.enabled": true,
-  "openqc.lsp.orca.path": "orca-lsp",
-  
-  "openqc.lsp.qe.enabled": true,
-  "openqc.lsp.qe.path": "qe-lsp",
-  
-  "openqc.lsp.gamess.enabled": true,
-  "openqc.lsp.gamess.path": "gamess-lsp",
-  
-  "openqc.lsp.nwchem.enabled": true,
-  "openqc.lsp.nwchem.path": "nwchem-lsp"
-}
-```
+  // Auto-open visualization when opening files
+  "openqc.visualization.autoOpen": true,
 
-### Visualization Configuration
-
-```json
-{
+  // Your preferred rendering engine
   "openqc.visualization.moleculeRenderer": "3Dmol.js",
-  "openqc.visualization.plotLibrary": "Plotly.js",
-  "openqc.visualization.autoOpen": true
+
+  // Auto-refresh sidebar views
+  "openqc.sidebar.autoRefresh": true
 }
 ```
 
-## Commands
+---
 
-| Command | Description |
-|---------|-------------|
-| `OpenQC: Visualize Structure` | Open 3D molecular structure viewer |
-| `OpenQC: Plot Calculation Data` | Plot SCF energies and convergence data |
-| `OpenQC: Preview Input File` | Show structured preview of input file |
-| `OpenQC: Start Language Server` | Manually start the language server |
-| `OpenQC: Stop Language Server` | Stop the language server |
-| `OpenQC: Restart Language Server` | Restart the language server |
+## 💡 Use Cases
 
-## Architecture
+### For Computational Chemists
+- **Prepare inputs** faster with syntax highlighting and validation
+- **Visualize structures** before submitting jobs
+- **Debug convergence** issues with interactive plots
 
-### LSP Manager
+### For Experimentalists
+- **Inspect computational models** shared by collaborators
+- **Understand output** from quantum chemistry calculations
+- **Prepare structures** for computational studies
 
-The LSP Manager automatically:
-1. Detects the quantum chemistry software from file extension and content
-2. Launches the appropriate language server
-3. Manages server lifecycle (start/stop/restart)
-4. Handles multiple file types simultaneously
+### For Students & Educators
+- **Learn quantum chemistry** with visual feedback
+- **Understand input formats** with syntax highlighting
+- **Explore molecular systems** interactively
 
-### Visualization Pipeline
+### For Software Developers
+- **Build tools** on top of OpenQC's parsing capabilities
+- **Integrate** with your computational workflows
+- **Extend** support for additional software
 
-```
-Input File → Parser → Atoms/Data → Webview → 3Dmol.js/Plotly.js
-```
+---
 
-### File Type Detection
+## 🌟 What's Coming?
 
-Multi-layer detection:
-1. **Filename match** - Exact filename (e.g., `INCAR`, `POSCAR`)
-2. **Extension match** - File extension (e.g., `.inp`, `.gjf`)
-3. **Content analysis** - Regex patterns for ambiguous cases
+### Near Term (v2.1)
+- [ ] Format conversion between different quantum chemistry formats
+- [ ] Batch processing — visualize multiple structures at once
+- [ ] Export high-resolution images for publications
+- [ ] Custom color schemes and rendering options
 
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- TypeScript 5.3+
-- VSCode 1.85+
-
-### Setup
-
-```bash
-# Clone repository
-git clone https://github.com/newtontech/OpenQC-VSCode.git
-cd OpenQC-VSCode
-
-# Install dependencies
-npm install
-
-# Compile
-npm run compile
-
-# Watch mode for development
-npm run watch
-```
-
-### Project Structure
-
-```
-OpenQC-VSCode/
-├── src/
-│   ├── extension.ts              # Extension entry point
-│   ├── managers/
-│   │   ├── LSPManager.ts         # Language server management
-│   │   └── FileTypeDetector.ts   # File type detection
-│   ├── providers/
-│   │   ├── StructureViewer.ts    # 3D structure visualization
-│   │   └── DataPlotter.ts        # Data plotting
-│   └── visualizers/
-│       └── Molecule3D.ts         # Molecule parsing
-├── syntaxes/                      # Syntax highlighting
-├── language-configurations/       # Language config
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
-### Testing
-
-```bash
-# Run tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run linting
-npm run lint
-```
-
-## Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Areas for Contribution
-
-- 🐛 Bug fixes
-- 💡 New features
-- 📝 Documentation improvements
-- 🎨 UI/UX improvements
-- 🔧 Additional LSP integrations
-- 📊 New visualization types
-
-## Roadmap
-
-### v2.1 (Planned)
-- [ ] Format conversion between quantum chemistry formats
-- [ ] Batch visualization
-- [ ] Custom color schemes
-- [ ] Export images
-
-### v2.2 (Planned)
+### Medium Term (v2.5)
 - [ ] Real-time calculation monitoring
-- [ ] Integration with job schedulers
-- [ ] Parameter templates
-- [ ] Cloud storage integration
+- [ ] Integration with job schedulers (SLURM, PBS)
+- [ ] Parameter templates and wizards
+- [ ] Collaboration features
 
-### v3.0 (Future)
+### Long Term (v3.0)
 - [ ] AI-powered parameter optimization
 - [ ] Natural language input generation
 - [ ] Workflow automation
-- [ ] Multi-package job orchestration
+- [ ] Cloud computing integration
 
-## Documentation
+---
 
-- [Project Roadmap](PLAN.md) - Development plan and milestones
-- [TDD Guidelines](TDD-GUIDELINES.md) - Testing best practices
-- [Task Management](TASK-MANAGEMENT.md) - How we organize work
-- [Architecture](docs/architecture/ARCHITECTURE.md) - System design
-- [API Reference](docs/api/API.md) - Developer documentation
+## 🤝 Contributing
 
-## License
+We welcome contributions! See something missing? Let us know:
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- **Add support for your favorite quantum chemistry software**
+- **Improve parsing for existing formats**
+- **Enhance visualization features**
+- **Fix bugs and improve performance**
 
-## Acknowledgments
+[Contributing Guidelines →](CONTRIBUTING.md)
 
-- **3Dmol.js** - Interactive molecular visualization
-- **Plotly.js** - Interactive data visualization
-- **vscode-languageclient** - VS Code Language Client library
-- Quantum Chemistry Community - Inspiration and feedback
+---
 
-## Support
+## 📚 Resources
 
-- 📧 Email: support@newtontech.com
-- 💬 Discord: [Join our community](https://discord.gg/openqc)
-- 📖 Documentation: [docs.openqc.dev](https://docs.openqc.dev)
-- 🐛 Issues: [GitHub Issues](https://github.com/newtontech/OpenQC-VSCode/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/newtontech/OpenQC-VSCode/discussions)
+- [Documentation](https://docs.openqc.dev)
+- [API Reference](https://api.openqc.dev)
+- [Report Issues](https://github.com/newtontech/OpenQC-VSCode/issues)
+- [Feature Requests](https://github.com/newtontech/OpenQC-VSCode/discussions)
 
-## Citation
+---
 
-If you use OpenQC-VSCode in your research, please cite:
+## 📄 Citation
+
+If OpenQC helps your research, please cite us:
 
 ```bibtex
 @software{openqc2026,
-  title = {OpenQC-VSCode: Universal VS Code Extension for Quantum Chemistry},
+  title = {OpenQC: Universal VS Code Extension for Computational Chemistry},
   author = {NewtonTech},
   year = {2026},
   version = {2.0},
@@ -331,6 +258,17 @@ If you use OpenQC-VSCode in your research, please cite:
 
 ---
 
-**Made with ❤️ by the NewtonTech team**
+## 📜 License
 
-⭐ **Star us on GitHub** if you find OpenQC-VSCode helpful!
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the computational chemistry community**
+
+[⭐ Star us on GitHub](https://github.com/newtontech/OpenQC-VSCode) •
+[💬 Join the discussion](https://github.com/newtontech/OpenQC-VSCode/discussions)
+
+</div>

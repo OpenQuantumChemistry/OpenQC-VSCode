@@ -190,9 +190,7 @@ export class ThreeJsRenderer {
   /**
    * Get default visualization configuration
    */
-  private getDefaultConfig(
-    overrides?: Partial<VisualizationConfig>
-  ): VisualizationConfig {
+  private getDefaultConfig(overrides?: Partial<VisualizationConfig>): VisualizationConfig {
     return {
       representationMode: 'ball-and-stick',
       showBonds: true,
@@ -334,8 +332,8 @@ export class ThreeJsRenderer {
    * Get current atom colors map
    */
   public getAtomColors(): Array<{ element: string; color: string }> {
-    const uniqueElements = [...new Set(this.atoms.map((a) => a.element))];
-    return uniqueElements.map((element) => ({
+    const uniqueElements = [...new Set(this.atoms.map(a => a.element))];
+    return uniqueElements.map(element => ({
       element,
       color: this.getAtomColor(element),
     }));
@@ -345,9 +343,9 @@ export class ThreeJsRenderer {
    * Get current atom radii map
    */
   public getAtomRadii(): Record<string, number> {
-    const uniqueElements = [...new Set(this.atoms.map((a) => a.element))];
+    const uniqueElements = [...new Set(this.atoms.map(a => a.element))];
     const radii: Record<string, number> = {};
-    uniqueElements.forEach((element) => {
+    uniqueElements.forEach(element => {
       radii[element] = this.getAtomRadius(element);
     });
     return radii;
@@ -366,11 +364,11 @@ export class ThreeJsRenderer {
   private clearAtoms(): void {
     if (!this.scene) return;
 
-    this.atomMeshes.forEach((mesh) => {
+    this.atomMeshes.forEach(mesh => {
       this.scene!.remove(mesh);
       mesh.geometry.dispose();
       if (Array.isArray(mesh.material)) {
-        mesh.material.forEach((m) => m.dispose());
+        mesh.material.forEach(m => m.dispose());
       } else {
         mesh.material.dispose();
       }
@@ -452,11 +450,7 @@ export class ThreeJsRenderer {
     if (!atom1 || !atom2) return null;
 
     // Create cylinder for bond
-    const direction = new THREE.Vector3(
-      atom2.x - atom1.x,
-      atom2.y - atom1.y,
-      atom2.z - atom1.z
-    );
+    const direction = new THREE.Vector3(atom2.x - atom1.x, atom2.y - atom1.y, atom2.z - atom1.z);
     const length = direction.length();
 
     const geometry = new THREE.CylinderGeometry(
@@ -479,10 +473,7 @@ export class ThreeJsRenderer {
       (atom1.z + atom2.z) / 2
     );
     mesh.position.copy(midpoint);
-    mesh.quaternion.setFromUnitVectors(
-      new THREE.Vector3(0, 1, 0),
-      direction.normalize()
-    );
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
 
     return mesh;
   }
@@ -500,11 +491,11 @@ export class ThreeJsRenderer {
   private clearBonds(): void {
     if (!this.scene) return;
 
-    this.bondMeshes.forEach((mesh) => {
+    this.bondMeshes.forEach(mesh => {
       this.scene!.remove(mesh);
       mesh.geometry.dispose();
       if (Array.isArray(mesh.material)) {
-        mesh.material.forEach((m) => m.dispose());
+        mesh.material.forEach(m => m.dispose());
       } else {
         mesh.material.dispose();
       }
@@ -595,7 +586,7 @@ export class ThreeJsRenderer {
 
     // Calculate bounding box
     const box = new THREE.Box3();
-    this.atoms.forEach((atom) => {
+    this.atoms.forEach(atom => {
       box.expandByPoint(new THREE.Vector3(atom.x, atom.y, atom.z));
     });
 
@@ -610,11 +601,7 @@ export class ThreeJsRenderer {
     const maxDim = Math.max(size.x, size.y, size.z);
     const distance = maxDim * 2;
 
-    this.camera.position.set(
-      center.x + distance,
-      center.y + distance,
-      center.z + distance
-    );
+    this.camera.position.set(center.x + distance, center.y + distance, center.z + distance);
     this.camera.lookAt(center);
   }
 
@@ -639,10 +626,7 @@ export class ThreeJsRenderer {
     offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), theta);
 
     // Rotate around X axis (limited)
-    const xAxis = new THREE.Vector3(1, 0, 0).applyAxisAngle(
-      new THREE.Vector3(0, 1, 0),
-      theta
-    );
+    const xAxis = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), theta);
     offset.applyAxisAngle(xAxis, phi);
 
     // Update camera position
@@ -800,7 +784,7 @@ export class ThreeJsRenderer {
       this.renderer.render(this.scene, this.camera);
     }
 
-    this.snapshotCallbacks.forEach((cb) => cb());
+    this.snapshotCallbacks.forEach(cb => cb());
   }
 
   /**

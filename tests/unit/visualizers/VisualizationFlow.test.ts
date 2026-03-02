@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { StructureConverter, Atom } from '../../../src/visualizers/StructureConverter';
+import { StructureConverter } from '../../../src/visualizers/StructureConverter';
+import { Atom } from '../../../src/visualizers/types';
 import { Molecule3D } from '../../../src/visualizers/Molecule3D';
 import { VASPParser } from '../../../src/parsers/VASPParser';
 
@@ -50,8 +51,8 @@ Direct
       const atoms = molecule3D.parseAtoms(poscarContent, 'VASP');
 
       expect(atoms).toHaveLength(2);
-      expect(atoms[0]).toEqual({ elem: 'Si', x: 0, y: 0, z: 0 });
-      expect(atoms[1]).toEqual({ elem: 'Si', x: 0.25, y: 0.25, z: 0.25 });
+      expect(atoms[0]).toEqual({ element: 'Si', x: 0, y: 0, z: 0 });
+      expect(atoms[1]).toEqual({ element: 'Si', x: 0.25, y: 0.25, z: 0.25 });
     });
 
     it('converts atoms to XYZ format', () => {
@@ -83,9 +84,9 @@ H  -0.441  -0.143   0.9
       const atoms = molecule3D.parseAtoms(gaussianContent, 'Gaussian');
 
       expect(atoms).toHaveLength(3);
-      expect(atoms[0].elem).toBe('O');
-      expect(atoms[1].elem).toBe('H');
-      expect(atoms[2].elem).toBe('H');
+      expect(atoms[0].element).toBe('O');
+      expect(atoms[1].element).toBe('H');
+      expect(atoms[2].element).toBe('H');
     });
 
     it('converts to XYZ format', () => {
@@ -118,8 +119,8 @@ H  -0.5134   0.8893  -0.3630
       const atoms = molecule3D.parseAtoms(orcaContent, 'ORCA');
 
       expect(atoms).toHaveLength(5);
-      expect(atoms[0].elem).toBe('C');
-      expect(atoms[1].elem).toBe('H');
+      expect(atoms[0].element).toBe('C');
+      expect(atoms[1].element).toBe('H');
     });
   });
 
@@ -132,13 +133,13 @@ H  -0.5134   0.8893  -0.3630
     });
 
     it('handles special characters in molecule name', () => {
-      const atoms: Atom[] = [{ elem: 'Fe', x: 0, y: 0, z: 0 }];
+      const atoms: Atom[] = [{ element: 'Fe', x: 0, y: 0, z: 0 }];
       const xyz = StructureConverter.atomsToXYZ(atoms, 'Iron(III) oxide [Fe2O3]');
       expect(xyz).toContain('Iron(III) oxide [Fe2O3]');
     });
 
     it('handles very small coordinates', () => {
-      const atoms: Atom[] = [{ elem: 'H', x: 0.0000001, y: -0.0000001, z: 0.0 }];
+      const atoms: Atom[] = [{ element: 'H', x: 0.0000001, y: -0.0000001, z: 0.0 }];
       const xyz = StructureConverter.atomsToXYZ(atoms, 'test');
       expect(xyz).toContain('0.000000');
     });
@@ -147,19 +148,19 @@ H  -0.5134   0.8893  -0.3630
   describe('JSON format conversion', () => {
     it('converts atoms to NGL-compatible JSON', () => {
       const atoms: Atom[] = [
-        { elem: 'H', x: 0, y: 0, z: 0 },
-        { elem: 'O', x: 0, y: 0, z: 1 },
+        { element: 'H', x: 0, y: 0, z: 0 },
+        { element: 'O', x: 0, y: 0, z: 1 },
       ];
 
       const json = StructureConverter.atomsToJSON(atoms);
       const parsed = JSON.parse(json);
 
       expect(parsed.atoms).toHaveLength(2);
-      expect(parsed.atoms[0]).toEqual({ elem: 'H', x: 0, y: 0, z: 0 });
+      expect(parsed.atoms[0]).toEqual({ element: 'H', x: 0, y: 0, z: 0 });
     });
 
     it('includes unit cell data for periodic systems', () => {
-      const atoms: Atom[] = [{ elem: 'Si', x: 0, y: 0, z: 0 }];
+      const atoms: Atom[] = [{ element: 'Si', x: 0, y: 0, z: 0 }];
       const unitCell = {
         a: 5.43,
         b: 5.43,

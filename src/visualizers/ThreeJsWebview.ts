@@ -65,7 +65,7 @@ export class ThreeJsWebview {
 
     // Handle messages from the webview
     this.panel.webview.onDidReceiveMessage(
-      (message) => this.handleMessage(message),
+      message => this.handleMessage(message),
       null,
       this.disposables
     );
@@ -425,18 +425,16 @@ export class ThreeJsWebview {
         filters: { Images: ['png'] },
         defaultUri: vscode.Uri.file('molecule.png'),
       })
-      .then((uri) => {
+      .then(uri => {
         if (uri) {
-          vscode.workspace.fs
-            .writeFile(uri, Buffer.from(data, 'base64'))
-            .then(
-              () => {
-                vscode.window.showInformationMessage(`Image saved to ${uri.fsPath}`);
-              },
-              (error) => {
-                vscode.window.showErrorMessage(`Failed to save image: ${error}`);
-              }
-            );
+          vscode.workspace.fs.writeFile(uri, Buffer.from(data, 'base64')).then(
+            () => {
+              vscode.window.showInformationMessage(`Image saved to ${uri.fsPath}`);
+            },
+            error => {
+              vscode.window.showErrorMessage(`Failed to save image: ${error}`);
+            }
+          );
         }
       });
   }
@@ -497,8 +495,7 @@ export class ThreeJsWebview {
  */
 function getNonce(): string {
   let text = '';
-  const possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }

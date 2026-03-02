@@ -103,8 +103,7 @@ export class FormatConverter {
   constructor(config: FormatConverterConfig = {}) {
     this.config = {
       pythonPath: config.pythonPath || 'python3',
-      scriptPath: config.scriptPath ||
-        path.join(__dirname, '../../../python/format_converter.py'),
+      scriptPath: config.scriptPath || path.join(__dirname, '../../../python/format_converter.py'),
       preserveMetadata: config.preserveMetadata ?? true,
     };
     this.outputChannel = vscode.window.createOutputChannel('OpenQC Format Converter');
@@ -165,7 +164,7 @@ export class FormatConverter {
     inputPath: string,
     outputPath: string,
     fromFormat?: SupportedFormat,
-    toFormat?: SupportedFormat,
+    toFormat?: SupportedFormat
   ): Promise<ConversionResult> {
     try {
       this.log(`Converting ${inputPath} to ${outputPath}`);
@@ -174,11 +173,7 @@ export class FormatConverter {
       const sourceFormat = fromFormat || detection?.format;
       const targetFormat = toFormat || FormatConverter.detectFormat(outputPath).format;
 
-      const args = [
-        this.config.scriptPath!,
-        inputPath,
-        outputPath,
-      ];
+      const args = [this.config.scriptPath!, inputPath, outputPath];
 
       if (fromFormat) {
         args.push('--from', fromFormat);
@@ -224,7 +219,7 @@ export class FormatConverter {
     inputPaths: string[],
     outputDir: string,
     toFormat: SupportedFormat,
-    fromFormat?: SupportedFormat,
+    fromFormat?: SupportedFormat
   ): Promise<BatchConversionResult> {
     try {
       this.log(`Batch converting ${inputPaths.length} files to ${toFormat}`);
@@ -269,7 +264,9 @@ export class FormatConverter {
   /**
    * Convert the current editor document to a different format
    */
-  async convertCurrentDocument(targetFormat: SupportedFormat): Promise<ConversionResult | undefined> {
+  async convertCurrentDocument(
+    targetFormat: SupportedFormat
+  ): Promise<ConversionResult | undefined> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage('No active document');
@@ -328,7 +325,7 @@ export class FormatConverter {
     const action = await vscode.window.showWarningMessage(
       'OpenQC Format Converter requires Python and dpdata. Install now?',
       'Install',
-      'Cancel',
+      'Cancel'
     );
 
     if (action === 'Install') {
@@ -344,7 +341,7 @@ export class FormatConverter {
    */
   static convertToXYZ(
     atoms: Array<{ elem: string; x: number; y: number; z: number }>,
-    comment: string = 'molecule',
+    comment: string = 'molecule'
   ): string {
     const lines: string[] = [];
 
@@ -391,7 +388,7 @@ export async function quickConvert(targetFormat: SupportedFormat): Promise<void>
     const action = await vscode.window.showInformationMessage(
       `Successfully converted to ${targetFormat.toUpperCase()}`,
       'Open File',
-      'Copy to Clipboard',
+      'Copy to Clipboard'
     );
 
     if (action === 'Open File' && result.output_file) {

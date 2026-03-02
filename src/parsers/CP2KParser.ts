@@ -221,17 +221,16 @@ export class CP2KParser extends BaseParser {
   /**
    * Find a subsection recursively within a section
    */
-  private findSubsection(
-    section: ParsedSection,
-    name: string
-  ): ParsedSection | undefined {
+  private findSubsection(section: ParsedSection, name: string): ParsedSection | undefined {
     if (section.name.toLowerCase() === name.toLowerCase()) {
       return section;
     }
     if (section.subsections) {
       for (const subsection of section.subsections) {
         const found = this.findSubsection(subsection, name);
-        if (found) {return found;}
+        if (found) {
+          return found;
+        }
       }
     }
     return undefined;
@@ -387,8 +386,8 @@ export class CP2KParser extends BaseParser {
         atomTypes.push(kindInfo.elementName);
       } else {
         // Fallback: try to find element from parameters
-        const elementParam = kind.parameters?.find((p: any) =>
-          p.name.toUpperCase() === '_SECTION_PARAMETERS'
+        const elementParam = kind.parameters?.find(
+          (p: any) => p.name.toUpperCase() === '_SECTION_PARAMETERS'
         );
         if (elementParam && typeof elementParam.value === 'string') {
           atomTypes.push(elementParam.value.split(/\s+/)[0]);
@@ -436,8 +435,8 @@ export class CP2KParser extends BaseParser {
       if (kindInfo.elementName) {
         element = kindInfo.elementName;
       } else {
-        const elementParam = kind.parameters?.find((p: any) =>
-          p.name.toUpperCase() === '_SECTION_PARAMETERS'
+        const elementParam = kind.parameters?.find(
+          (p: any) => p.name.toUpperCase() === '_SECTION_PARAMETERS'
         );
         if (elementParam && typeof elementParam.value === 'string') {
           element = elementParam.value.split(/\s+/)[0];
@@ -446,9 +445,7 @@ export class CP2KParser extends BaseParser {
         }
       }
 
-      const basisSetParam = kind.parameters?.find(
-        (p: any) => p.name.toUpperCase() === 'BASIS_SET'
-      );
+      const basisSetParam = kind.parameters?.find((p: any) => p.name.toUpperCase() === 'BASIS_SET');
       if (basisSetParam && typeof basisSetParam.value === 'string') {
         basisSets.set(element, basisSetParam.value);
       }

@@ -52,7 +52,7 @@ describe('ThreeJsRenderer', () => {
     document.body.appendChild(mockContainer);
 
     // Mock requestAnimationFrame and cancelAnimationFrame
-    global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 16));
+    global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 16));
     global.cancelAnimationFrame = jest.fn();
 
     renderer = new ThreeJsRenderer(mockContainer);
@@ -141,9 +141,7 @@ describe('ThreeJsRenderer', () => {
     });
 
     it('should handle unknown elements gracefully', () => {
-      const result = renderer.renderAtoms([
-        { element: 'Xx', x: 0, y: 0, z: 0 },
-      ]);
+      const result = renderer.renderAtoms([{ element: 'Xx', x: 0, y: 0, z: 0 }]);
       expect(result.success).toBe(true);
       expect(result.atomCount).toBe(1);
     });
@@ -268,16 +266,14 @@ describe('ThreeJsRenderer', () => {
 
   describe('export and snapshot', () => {
     it('should export scene as image data', () => {
-      renderer.renderAtoms([
-        { element: 'H', x: 0, y: 0, z: 0 },
-      ]);
-      const imageData = renderer.exportImage('png');
+      renderer.renderAtoms([{ element: 'H', x: 0, y: 0, z: 0 }]);
+      const imageData = renderer.exportImage({ format: 'png' });
       expect(imageData).toBeDefined();
       expect(imageData.format).toBe('png');
     });
 
     it('should throw error for unsupported export format', () => {
-      expect(() => renderer.exportImage('bmp' as any)).toThrow();
+      expect(() => renderer.exportImage({ format: 'bmp' as any })).toThrow();
     });
 
     it('should support snapshot callbacks', () => {

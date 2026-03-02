@@ -63,11 +63,7 @@ export interface AtomicRadii {
 /**
  * Representation modes for molecular visualization
  */
-export type RepresentationMode =
-  | 'ball-and-stick'
-  | 'space-filling'
-  | 'wireframe'
-  | 'stick';
+export type RepresentationMode = 'ball-and-stick' | 'space-filling' | 'wireframe' | 'stick';
 
 /**
  * Camera position and orientation

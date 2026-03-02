@@ -39,7 +39,7 @@ Cartesian
       expect(structure.name).toBe('H2O.poscar');
 
       // Verify atom data is correct
-      const oxygenAtom = structure.atoms.find((a) => a.element === 'O');
+      const oxygenAtom = structure.atoms.find(a => a.element === 'O');
       expect(oxygenAtom).toBeDefined();
       expect(oxygenAtom?.x).toBe(0.5);
       expect(oxygenAtom?.y).toBe(0.5);
@@ -80,8 +80,8 @@ Cartesian
       const structure = converter.fromPOSCAR(poscarContent);
 
       expect(structure.atoms).toHaveLength(9);
-      expect(structure.atoms.filter((a) => a.element === 'Si')).toHaveLength(3);
-      expect(structure.atoms.filter((a) => a.element === 'O')).toHaveLength(6);
+      expect(structure.atoms.filter(a => a.element === 'Si')).toHaveLength(3);
+      expect(structure.atoms.filter(a => a.element === 'O')).toHaveLength(6);
 
       const validation = converter.validateStructure(structure);
       expect(validation.valid).toBe(true);
@@ -108,7 +108,7 @@ Cartesian
     });
 
     it('should auto-detect and convert XYZ format', () => {
-      const xyzContent = `4
+      const xyzContent = `5
 Methane
 C 0.0 0.0 0.0
 H 0.63 0.63 0.63
@@ -121,7 +121,7 @@ H 0.63 -0.63 -0.63
 
       expect(structure.atoms).toHaveLength(5);
       expect(structure.atoms[0].element).toBe('C');
-      expect(structure.atoms.filter((a) => a.element === 'H')).toHaveLength(4);
+      expect(structure.atoms.filter(a => a.element === 'H')).toHaveLength(4);
     });
 
     it('should auto-detect and convert Gaussian format', () => {

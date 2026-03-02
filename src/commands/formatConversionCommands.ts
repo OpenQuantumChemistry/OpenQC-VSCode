@@ -21,7 +21,7 @@ export function registerFormatConversionCommands(context: vscode.ExtensionContex
     'openqc.convertFormat',
     async (uri?: vscode.Uri) => {
       await handleConvertCommand(uri);
-    },
+    }
   );
 
   // Quick convert commands for common formats
@@ -29,37 +29,34 @@ export function registerFormatConversionCommands(context: vscode.ExtensionContex
     'openqc.convertToXYZ',
     async (uri?: vscode.Uri) => {
       await handleQuickConvert(uri, SupportedFormat.XYZ);
-    },
+    }
   );
 
   const convertToPDB = vscode.commands.registerCommand(
     'openqc.convertToPDB',
     async (uri?: vscode.Uri) => {
       await handleQuickConvert(uri, SupportedFormat.PDB);
-    },
+    }
   );
 
   const convertToVASP = vscode.commands.registerCommand(
     'openqc.convertToVASP',
     async (uri?: vscode.Uri) => {
       await handleQuickConvert(uri, SupportedFormat.POSCAR);
-    },
+    }
   );
 
   const convertToGaussian = vscode.commands.registerCommand(
     'openqc.convertToGaussian',
     async (uri?: vscode.Uri) => {
       await handleQuickConvert(uri, SupportedFormat.Gaussian);
-    },
+    }
   );
 
   // Batch conversion
-  const batchConvertCommand = vscode.commands.registerCommand(
-    'openqc.batchConvert',
-    async () => {
-      await handleBatchConvert();
-    },
-  );
+  const batchConvertCommand = vscode.commands.registerCommand('openqc.batchConvert', async () => {
+    await handleBatchConvert();
+  });
 
   // Check format converter availability
   const checkBackendCommand = vscode.commands.registerCommand(
@@ -69,21 +66,19 @@ export function registerFormatConversionCommands(context: vscode.ExtensionContex
       const available = await converter.checkBackend();
 
       if (available) {
-        vscode.window.showInformationMessage(
-          'Format converter backend is available and ready.',
-        );
+        vscode.window.showInformationMessage('Format converter backend is available and ready.');
       } else {
         const action = await vscode.window.showWarningMessage(
           'Format converter backend is not available. Python and dpdata are required.',
           'Install Instructions',
-          'Close',
+          'Close'
         );
 
         if (action === 'Install Instructions') {
           await showInstallInstructions();
         }
       }
-    },
+    }
   );
 
   context.subscriptions.push(
@@ -93,7 +88,7 @@ export function registerFormatConversionCommands(context: vscode.ExtensionContex
     convertToVASP,
     convertToGaussian,
     batchConvertCommand,
-    checkBackendCommand,
+    checkBackendCommand
   );
 }
 
@@ -112,14 +107,18 @@ async function handleConvertCommand(uri?: vscode.Uri): Promise<void> {
     [
       { label: 'XYZ', description: 'Standard molecular coordinates', format: SupportedFormat.XYZ },
       { label: 'PDB', description: 'Protein Data Bank format', format: SupportedFormat.PDB },
-      { label: 'CIF', description: 'Crystallographic Information File', format: SupportedFormat.CIF },
+      {
+        label: 'CIF',
+        description: 'Crystallographic Information File',
+        format: SupportedFormat.CIF,
+      },
       { label: 'VASP', description: 'VASP POSCAR format', format: SupportedFormat.POSCAR },
       { label: 'Gaussian', description: 'Gaussian input format', format: SupportedFormat.Gaussian },
       { label: 'ORCA', description: 'ORCA input format', format: SupportedFormat.ORCA },
     ],
     {
       placeHolder: 'Select target format',
-    },
+    }
   );
 
   if (!targetFormat) {
@@ -132,7 +131,10 @@ async function handleConvertCommand(uri?: vscode.Uri): Promise<void> {
 /**
  * Handle quick convert to a specific format
  */
-async function handleQuickConvert(uri: vscode.Uri | undefined, format: SupportedFormat): Promise<void> {
+async function handleQuickConvert(
+  uri: vscode.Uri | undefined,
+  format: SupportedFormat
+): Promise<void> {
   const fileUri = uri || vscode.window.activeTextEditor?.document.uri;
   if (!fileUri) {
     vscode.window.showErrorMessage('No file selected for conversion');
@@ -153,7 +155,7 @@ async function convertFile(filePath: string, targetFormat: SupportedFormat): Pro
     const action = await vscode.window.showWarningMessage(
       'Format converter backend is not available. Install Python and dpdata?',
       'Install',
-      'Cancel',
+      'Cancel'
     );
 
     if (action === 'Install') {
@@ -182,7 +184,7 @@ async function convertFile(filePath: string, targetFormat: SupportedFormat): Pro
           `Successfully converted to ${targetFormat.toUpperCase()}`,
           'Open File',
           'Copy to Clipboard',
-          'Show in Folder',
+          'Show in Folder'
         );
 
         if (action === 'Open File') {
@@ -198,7 +200,7 @@ async function convertFile(filePath: string, targetFormat: SupportedFormat): Pro
       } else {
         vscode.window.showErrorMessage(`Conversion failed: ${result.error}`);
       }
-    },
+    }
   );
 }
 
@@ -240,7 +242,7 @@ async function handleBatchConvert(): Promise<void> {
       { label: 'CIF', format: SupportedFormat.CIF },
       { label: 'VASP', format: SupportedFormat.POSCAR },
     ],
-    { placeHolder: 'Select target format' },
+    { placeHolder: 'Select target format' }
   );
 
   if (!targetFormat) {
@@ -271,27 +273,25 @@ async function handleBatchConvert(): Promise<void> {
       cancellable: false,
     },
     async () => {
-      const result = await converter.batchConvert(
-        filePaths,
-        outputDir,
-        targetFormat.format,
-      );
+      const result = await converter.batchConvert(filePaths, outputDir, targetFormat.format);
 
       if (result.success) {
-        vscode.window.showInformationMessage(
-          `Successfully converted ${result.successful} of ${result.total} files`,
-          'Open Folder',
-        ).then(action => {
-          if (action === 'Open Folder') {
-            vscode.env.openExternal(vscode.Uri.file(outputDir));
-          }
-        });
+        vscode.window
+          .showInformationMessage(
+            `Successfully converted ${result.successful} of ${result.total} files`,
+            'Open Folder'
+          )
+          .then(action => {
+            if (action === 'Open Folder') {
+              vscode.env.openExternal(vscode.Uri.file(outputDir));
+            }
+          });
       } else {
         vscode.window.showErrorMessage(
-          `Batch conversion completed with errors: ${result.failed} of ${result.total} failed`,
+          `Batch conversion completed with errors: ${result.failed} of ${result.total} failed`
         );
       }
-    },
+    }
   );
 }
 
@@ -303,7 +303,7 @@ async function showInstallInstructions(): Promise<void> {
     'openqc.converter.setup',
     'OpenQC Format Converter Setup',
     vscode.ViewColumn.One,
-    { enableScripts: true },
+    { enableScripts: true }
   );
 
   panel.webview.html = `

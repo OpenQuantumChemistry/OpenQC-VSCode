@@ -160,7 +160,7 @@ describe('CP2KParser with Real Files', () => {
       const scfGuess = result.parameters.find(p => p.name === 'SCF_GUESS');
 
       expect(epsScf).toBeDefined();
-      expect(epsScf?.value).toBe(1.0E-6);
+      expect(epsScf?.value).toBe(1.0e-6);
       expect(maxScf?.value).toBe(100);
       expect(scfGuess?.value).toBe('ATOMIC');
     });

@@ -292,9 +292,7 @@ export class StructureConverter {
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
         if (dist < tolerance) {
-          warnings.push(
-            `Atoms ${i} and ${j} are very close (${dist.toFixed(3)} Å)`
-          );
+          warnings.push(`Atoms ${i} and ${j} are very close (${dist.toFixed(3)} Å)`);
         }
       }
     }
@@ -304,5 +302,50 @@ export class StructureConverter {
       errors,
       warnings,
     };
+  }
+
+  /**
+   * Convert atoms array to XYZ format string
+   *
+   * @param atoms - Array of atoms
+   * @param name - Structure name
+   * @returns XYZ format string
+   */
+  public static atomsToXYZ(atoms: Atom[], name: string = 'molecule'): string {
+    let xyz = `${atoms.length}\n`;
+    xyz += `${name}\n`;
+    for (const atom of atoms) {
+      xyz += `${atom.element.padEnd(2)} ${atom.x.toFixed(6)} ${atom.y.toFixed(6)} ${atom.z.toFixed(
+        6
+      )}\n`;
+    }
+    return xyz;
+  }
+
+  /**
+   * Convert atoms array to JSON format
+   *
+   * @param atoms - Array of atoms
+   * @param unitCell - Optional unit cell (vectors or cell parameters)
+   * @returns JSON string
+   */
+  public static atomsToJSON(
+    atoms: Atom[],
+    unitCell?:
+      | number[][]
+      | { a: number; b: number; c: number; alpha: number; beta: number; gamma: number }
+  ): string {
+    const data: any = {
+      atoms: atoms.map(atom => ({
+        element: atom.element,
+        x: atom.x,
+        y: atom.y,
+        z: atom.z,
+      })),
+    };
+    if (unitCell) {
+      data.unitCell = unitCell;
+    }
+    return JSON.stringify(data, null, 2);
   }
 }

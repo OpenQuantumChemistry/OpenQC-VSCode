@@ -147,10 +147,7 @@ describe('Format Conversion Integration Tests', () => {
     it('should handle non-existent input file', async () => {
       if (!(await getBackendAvailable())) return;
 
-      const result = await converter.convert(
-        '/nonexistent/file.xyz',
-        '/output/test.xyz',
-      );
+      const result = await converter.convert('/nonexistent/file.xyz', '/output/test.xyz');
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('not found');
@@ -159,10 +156,7 @@ describe('Format Conversion Integration Tests', () => {
     it('should handle invalid format conversion', async () => {
       if (!(await getBackendAvailable())) return;
 
-      const result = await converter.convert(
-        '/path/to/file.txt',
-        '/output/test.xyz',
-      );
+      const result = await converter.convert('/path/to/file.txt', '/output/test.xyz');
 
       // Should not crash even with unsupported input
       expect(result).toBeDefined();
@@ -173,15 +167,13 @@ describe('Format Conversion Integration Tests', () => {
     it('should convert multiple XYZ files to VASP', async () => {
       if (!(await getBackendAvailable())) return;
 
-      const inputFiles = [
-        path.join(fixturesDir, 'sample.xyz'),
-      ];
+      const inputFiles = [path.join(fixturesDir, 'sample.xyz')];
       const batchOutputDir = path.join(outputDir, 'batch');
 
       const result = await converter.batchConvert(
         inputFiles,
         batchOutputDir,
-        SupportedFormat.POSCAR,
+        SupportedFormat.POSCAR
       );
 
       expect(result.total).toBe(1);
