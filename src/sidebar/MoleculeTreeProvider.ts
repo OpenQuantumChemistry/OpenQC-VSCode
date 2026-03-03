@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 /**
  * Represents a molecule item in the tree view
@@ -122,13 +121,20 @@ export class MoleculeTreeProvider implements vscode.TreeDataProvider<MoleculeIte
    * Load molecules from workspace state
    */
   private loadMolecules(): void {
-    const saved = this.context.workspaceState.get<MoleculeItem[]>('openqc.molecules', []);
-    this.molecules = saved.map(
-      m => new MoleculeItem(m.id, m.label, m.formula, m.atomCount, m.filePath)
-    );
+    try {
+      const saved = this.context.workspaceState.get<MoleculeItem[]>('openqc.molecules', []);
+      this.molecules = saved
+        .filter(m => m && m.id)
+        .map(m => new MoleculeItem(m.id, m.label, m.formula, m.atomCount, m.filePath));
 
-    // If no saved molecules, add some sample data for demonstration
-    if (this.molecules.length === 0) {
+      // If no saved molecules, add some sample data for demonstration
+      if (this.molecules.length === 0) {
+        this.addSampleMolecules();
+      }
+    } catch (error) {
+      console.error('Failed to load molecules:', error);
+      this.molecules = [];
+      // Add sample molecules as fallback
       this.addSampleMolecules();
     }
   }
@@ -136,8 +142,12 @@ export class MoleculeTreeProvider implements vscode.TreeDataProvider<MoleculeIte
   /**
    * Save molecules to workspace state
    */
-  private saveMolecules(): void {
-    this.context.workspaceState.update('openqc.molecules', this.molecules);
+  private async saveMolecules(): Promise<void> {
+    try {
+      await this.context.workspaceState.update('openqc.molecules', this.molecules);
+    } catch (error) {
+      console.error('Failed to save molecules:', error);
+    }
   }
 
   /**
@@ -165,6 +175,7 @@ export class MoleculeTreeProvider implements vscode.TreeDataProvider<MoleculeIte
 
     if (this.autoRefreshInterval) {
       clearInterval(this.autoRefreshInterval);
+      this.autoRefreshInterval = undefined;
     }
 
     if (autoRefresh) {

@@ -133,8 +133,9 @@ export class JobTreeProvider implements vscode.TreeDataProvider<JobItem> {
    * Update job status
    */
   updateJobStatus(id: string, status: JobStatus, progress: number): void {
-    const job = this.jobs.find(j => j.id === id);
-    if (job) {
+    const index = this.jobs.findIndex(j => j.id === id);
+    if (index >= 0) {
+      const job = this.jobs[index];
       // Create updated job with new status
       const updatedJob = new JobItem(
         job.id,
@@ -147,7 +148,6 @@ export class JobTreeProvider implements vscode.TreeDataProvider<JobItem> {
           ? new Date()
           : undefined
       );
-      const index = this.jobs.findIndex(j => j.id === id);
       this.jobs[index] = updatedJob;
       this.saveJobs();
       this._onDidChangeTreeData.fire();
@@ -214,22 +214,31 @@ export class JobTreeProvider implements vscode.TreeDataProvider<JobItem> {
    * Load jobs from workspace state
    */
   private loadJobs(): void {
-    const saved = this.context.workspaceState.get<any[]>('openqc.jobs', []);
-    this.jobs = saved.map(
-      j =>
-        new JobItem(
-          j.id,
-          j.label,
-          j.status,
-          j.progress,
-          j.software,
-          j.startTime ? new Date(j.startTime) : undefined,
-          j.endTime ? new Date(j.endTime) : undefined
-        )
-    );
+    try {
+      const saved = this.context.workspaceState.get<any[]>('openqc.jobs', []);
+      this.jobs = saved
+        .filter(j => j && j.id)
+        .map(
+          j =>
+            new JobItem(
+              j.id,
+              j.label,
+              j.status,
+              j.progress,
+              j.software,
+              j.startTime ? new Date(j.startTime) : undefined,
+              j.endTime ? new Date(j.endTime) : undefined
+            )
+        );
 
-    // If no saved jobs, add some sample data for demonstration
-    if (this.jobs.length === 0) {
+      // If no saved jobs, add some sample data for demonstration
+      if (this.jobs.length === 0) {
+        this.addSampleJobs();
+      }
+    } catch (error) {
+      console.error('Failed to load jobs:', error);
+      this.jobs = [];
+      // Add sample jobs as fallback
       this.addSampleJobs();
     }
   }
@@ -237,8 +246,12 @@ export class JobTreeProvider implements vscode.TreeDataProvider<JobItem> {
   /**
    * Save jobs to workspace state
    */
-  private saveJobs(): void {
-    this.context.workspaceState.update('openqc.jobs', this.jobs);
+  private async saveJobs(): Promise<void> {
+    try {
+      await this.context.workspaceState.update('openqc.jobs', this.jobs);
+    } catch (error) {
+      console.error('Failed to save jobs:', error);
+    }
   }
 
   /**
@@ -305,6 +318,7 @@ export class JobTreeProvider implements vscode.TreeDataProvider<JobItem> {
 
     if (this.autoRefreshInterval) {
       clearInterval(this.autoRefreshInterval);
+      this.autoRefreshInterval = undefined;
     }
 
     if (autoRefresh) {

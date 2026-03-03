@@ -90,28 +90,142 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 
 ---
 
-## Phase 3: Conversion & Integration (Weeks 9-12)
+## Phase 2.5: Dynamic LSP Discovery (Week 8-9)
 
 ### Objectives
-- Seamless format conversion
-- Integration with external tools
-- Automated workflow support
+- 动态获取 OpenQuantumChemistry 组织下的 LSP 仓库列表
+- 消除硬编码的 LSP 配置，实现自动发现新 LSP
+- 更新 cron job 和自动化脚本以支持动态列表
+
+### GitHub Issue
+**#13**: [Feature] 动态获取组织下的 LSP 仓库列表 (https://github.com/newtontech/OpenQC-VSCode/issues/13)
+
+### Background
+Currently, OpenQC-VSCode hardcodes the list of supported LSPs in \`package.json\` and \`LSPManager.ts\` (CP2K, VASP, Gaussian, ORCA, QE, GAMESS, NWChem). This requires manual code updates whenever OpenQuantumChemistry organization adds new LSP repositories.
+
+### Available LSP Repositories
+From https://github.com/orgs/OpenQuantumChemistry/repositories:
+| Repository | Description | Status |
+|------------|-------------|--------|
+| orca-lsp | ORCA quantum chemistry software LSP | ✅ Active |
+| gamess-lsp | GAMESS (US) input files LSP | ✅ Active |
+| qe-lsp | Quantum ESPRESSO LSP | ✅ Active |
+| cp2k-lsp-enhanced | CP2K input file tools | ✅ Active |
+| gaussian-lsp | Gaussian LSP | ✅ Active |
+| vasp-lsp | VASP input/output files LSP | ✅ Active |
 
 ### Deliverables
 
-#### Week 9-10: Format Conversion
-- [ ] Integrate dpdata for format conversions
-- [ ] Support conversion matrix:
-  - VASP ↔ Gaussian ↔ ORCA
-  - Export to XYZ, PDB, CIF
-- [ ] Preserve metadata and calculation parameters
-- [ ] Batch conversion for multiple files
+#### Week 8: Dynamic Discovery Implementation
+- [ ] **GitHub API Integration** (Issue #13 - Phase 1)
+  - [ ] Create \`src/utils/LSPDiscovery.ts\` module
+  - [ ] Implement \`fetchLSPRepositories()\` using GitHub API
+  - [ ] Cache repository list with TTL (e.g., 1 hour)
+  - [ ] Handle API rate limiting and errors gracefully
+- [ ] **Dynamic Configuration** (Issue #13 - Phase 2)
+  - [ ] Modify \`LSPManager.ts\` to use discovered LSP list
+  - [ ] Auto-generate VSCode configuration contributions
+  - [ ] Support runtime LSP registration/unregistration
 
-#### Week 11-12: External Integrations
-- [ ] ASE (Atomic Simulation Environment) integration
-- [ ] PyMOL export for publication-quality images
-- [ ] Optional: CASTEP support via ASE
-- [ ] Optional: Quantum ESPRESSO support
+#### Week 9: Automation & Tooling Updates
+- [ ] **Cron Job Updates** (Issue #13 - Phase 3)
+  - [ ] Update \`scripts/qclsp-dev.sh\` to fetch LSP list dynamically
+  - [ ] Modify HEARTBEAT.md to discover projects from GitHub API
+  - [ ] Create \`scripts/update-lsp-list.sh\` for manual refresh
+- [ ] **CI/CD Integration** (Issue #13 - Phase 4)
+  - [ ] GitHub Action to validate LSP list daily
+  - [ ] Auto-generate PR when new LSP is detected
+  - [ ] Update documentation when LSP list changes
+
+### Implementation Details
+
+#### GitHub API Endpoint
+\`\`\`bash
+# List org repos with 'lsp' in name
+curl -s "https://api.github.com/orgs/OpenQuantumChemistry/repos?per_page=100" | \\
+  jq '.[] | select(.name | contains("lsp")) | .name'
+\`\`\`
+
+#### Dynamic Configuration Schema
+\`\`\`typescript
+interface LSPServerDefinition {
+  id: string;           // e.g., "vasp-lsp"
+  name: string;         // e.g., "VASP"
+  repository: string;   // e.g., "OpenQuantumChemistry/vasp-lsp"
+  executable: string;   // e.g., "vasp-lsp"
+  languageId: string;   // e.g., "vasp"
+  fileExtensions: string[];  // e.g., ["INCAR", "POSCAR"]
+  enabled: boolean;
+}
+\`\`\`
+
+### Success Metrics
+- LSP list auto-updates within 1 hour of new repo creation
+- Zero manual code changes required to support new LSP
+- Cron jobs automatically include new LSP projects
+- Backward compatibility maintained for existing configurations
+
+---
+
+## Phase 3: ASE Integration & Cross-Code Migration (Weeks 10-15)
+
+### Objectives
+- **Primary**: Full ASE integration as the "universal intermediate layer"
+- Cross-code workflow migration (VASP ↔ CP2K ↔ QE ↔ Gaussian ↔ ORCA)
+- Seamless format conversion with ASE Atoms as the bridge
+- Integration with external tools and automated workflows
+
+### Why ASE?
+ASE (Atomic Simulation Environment) provides:
+- **Unified Atoms object**: Single representation for all chemical structures
+- **Calculator abstraction**: Code-agnostic interface to DFT/MD/force-field engines
+- **Multi-backend support**: VASP, CP2K, QE, Gaussian, ORCA, NWChem, GAMESS, LAMMPS, etc.
+- **Workflow capabilities**: Structure manipulation, running jobs, reading results
+
+### GitHub Issue
+**#12**: [feat(ase): Integrate ASE for cross-code workflow migration](https://github.com/newtontech/OpenQC-VSCode/issues/12)
+
+### Deliverables
+
+#### Week 10-11: ASE Core Integration
+- [ ] **ASE Atoms Converter Module** (Issue #12 - Phase 1)
+  - [ ] VASP POSCAR ↔ ASE Atoms
+  - [ ] CP2K input ↔ ASE Atoms
+  - [ ] QE input ↔ ASE Atoms
+  - [ ] Gaussian input ↔ ASE Atoms
+  - [ ] ORCA input ↔ ASE Atoms
+  - [ ] NWChem input ↔ ASE Atoms
+  - [ ] GAMESS input ↔ ASE Atoms
+  - [ ] LAMMPS data ↔ ASE Atoms
+- [ ] ASE Calculator interface wrapper
+- [ ] Unified structure validation via ASE
+
+#### Week 12-13: Cross-Code Migration Tools
+- [ ] **Structure Migration Tool** (Issue #12 - Phase 2)
+  - VASP→CP2K, QE→Gaussian, etc.
+  - Preserve unit cells, atomic positions, constraints
+  - Handle periodic boundary conditions
+- [ ] **k-Point Grid Migration**
+  - Convert between Monkhorst-Pack and Gamma-centered
+  - Maintain density of k-points across codes
+- [ ] **Electronic Structure Parameter Migration**
+  - Map common parameters (ENCUT ↔ cutoff, etc.)
+- [ ] **MD/Optimization Workflow Migration**
+  - Convert MD parameters, optimization criteria
+
+#### Week 14-15: Advanced ASE Features
+- [ ] **ASE Calculator Integration** (Issue #12 - Phase 3)
+  - Direct job execution via ASE
+  - Generate inputs and run calculations
+  - Read results back into OpenQC-VSCode
+- [ ] **Complex Property Handling** (Issue #12 - Phase 4)
+  - Hubbard U parameters with per-code mapping
+  - Special constraints and frozen atoms
+  - Excited state methods
+  - Pseudopotential/basis set strategies
+- [ ] **Migration Validation Suite**
+  - Automated tests for round-trip conversions
+  - Energy/force consistency checks
 
 ### Technology Stack
 - **Conversion**: dpdata (Python backend)
@@ -125,7 +239,7 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 
 ---
 
-## Phase 4: AI Assistance (Weeks 13-16)
+## Phase 4: AI Assistance (Weeks 16-19)
 
 ### Objectives
 - AI-powered input file optimization
@@ -134,13 +248,13 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 
 ### Deliverables
 
-#### Week 13-14: AI Core
+#### Week 16-17: AI Core
 - [ ] Integrate LLM API (OpenAI/Anthropic/local models)
 - [ ] Context-aware prompt engineering for quantum chemistry
 - [ ] Input file analysis and optimization suggestions
 - [ ] Automatic parameter tuning recommendations
 
-#### Week 15-16: Smart Features
+#### Week 18-19: Smart Features
 - [ ] Natural language to input file generation
 - [ ] "Fix this structure" command
 - [ ] Explain input parameters in plain English
@@ -159,7 +273,7 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 
 ---
 
-## Phase 5: Advanced Features & Polish (Weeks 17-20)
+## Phase 5: Advanced Features & Polish (Weeks 20-23)
 
 ### Objectives
 - Performance optimization
@@ -168,13 +282,13 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 
 ### Deliverables
 
-#### Week 17-18: Performance
+#### Week 20-21: Performance
 - [ ] Lazy loading for large structures
 - [ ] WebWorker for heavy computations
 - [ ] Caching and incremental parsing
 - [ ] Memory optimization for 10k+ atom systems
 
-#### Week 19-20: Community & Documentation
+#### Week 22-23: Community & Documentation
 - [ ] Extension marketplace listing
 - [ ] Comprehensive documentation website
 - [ ] Video tutorials and quick-start guide
@@ -211,6 +325,7 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 - **Python Tools**: dpdata, ASE, PyMOL
 - **Conversion**: dpdata + custom adapters
 - **AI**: OpenAI API / Ollama / Local models
+- **GitHub API**: For dynamic LSP discovery
 
 ### Testing & Quality
 - **Unit Tests**: Jest (TS), pytest (Python)
@@ -251,6 +366,12 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 - **Timeline**: Phase 4
 - **Dependencies**: API keys or local model setup
 
+### Dynamic LSP Discovery
+- **Purpose**: Auto-discover and integrate new LSP servers from GitHub org
+- **Method**: GitHub API + dynamic configuration
+- **Timeline**: Phase 2.5
+- **Dependencies**: GitHub API access
+
 ---
 
 ## Milestones & Deliverables
@@ -259,9 +380,10 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 |-------|----------|----------------|-------------|
 | Phase 1 | 4 weeks | Basic parsing & highlighting | Week 4 |
 | Phase 2 | 4 weeks | 3D visualization working | Week 8 |
-| Phase 3 | 4 weeks | Format conversion complete | Week 12 |
-| Phase 4 | 4 weeks | AI features live | Week 16 |
-| Phase 5 | 4 weeks | Production-ready release | Week 20 |
+| Phase 2.5 | 2 weeks | Dynamic LSP discovery | Week 9 |
+| Phase 3 | 6 weeks | ASE integration complete | Week 15 |
+| Phase 4 | 4 weeks | AI features live | Week 19 |
+| Phase 5 | 4 weeks | Production-ready release | Week 23 |
 | Phase 6 | Ongoing | Enterprise features | Future |
 
 ---
@@ -272,6 +394,7 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 - **Large file performance** - Mitigate with lazy loading and WebWorkers
 - **3D rendering complexity** - Use established libraries (Three.js, NGL)
 - **Format compatibility** - Extensive test suite with real-world files
+- **GitHub API rate limits** - Implement caching and graceful degradation
 
 ### Resource Risks
 - **Development time** - Prioritize core features, defer nice-to-haves
@@ -290,6 +413,7 @@ OpenQC-VSCode aims to become the definitive VSCode extension for quantum chemist
 - ✅ 60 FPS rendering for 1000+ atom systems
 - ✅ 99% conversion accuracy
 - ✅ Test coverage ≥ 80%
+- ✅ Dynamic LSP discovery working
 
 ### User Impact
 - ✅ 10,000+ downloads in first year
@@ -313,6 +437,6 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Last Updated**: 2026-02-28
-**Version**: 1.0.0
-**Status**: Planning Phase
+**Last Updated**: 2026-03-03
+**Version**: 1.1.0
+**Status**: In Progress
